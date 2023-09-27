@@ -1,3 +1,9 @@
+import os
+
+os.environ['TK_SILENCE_DEPRECATION'] = '1'
+
+# Now you can import Tkinter or run your Tkinter-related code
+
 from tkinter import *
 from PIL import ImageTk, Image
 
@@ -6,7 +12,7 @@ class LoginPage:
     def __init__(self, window):
         self.window = window
         self.window.geometry('1166x718')
-        self.window.resizable(0, 0)
+        self.window.resizable(1, 1)
         self.window.state('zoomed')
         self.window.title('Login Page')
 
@@ -46,16 +52,16 @@ class LoginPage:
         # ========================================================================
         self.sign_in_image = Image.open('images/hyy.png')
         photo = ImageTk.PhotoImage(self.sign_in_image)
-        self.sign_in_image_label = Label(self.lgn_frame, image=photo, bg='#040405')
-        self.sign_in_image_label.image = photo
-        self.sign_in_image_label.place(x=620, y=130)
+        self.register_image_label = Label(self.lgn_frame, image=photo, bg='#040405')
+        self.register_image_label.image = photo
+        self.register_image_label.place(x=620, y=130)
 
         # ========================================================================
         # ============ Sign In label =============================================
         # ========================================================================
-        self.sign_in_label = Label(self.lgn_frame, text="Sign In", bg="#040405", fg="white",
+        self.register_label = Label(self.lgn_frame, text="Sign In", bg="#040405", fg="white",
                                     font=("yu gothic ui", 17, "bold"))
-        self.sign_in_label.place(x=650, y=240)
+        self.register_label.place(x=650, y=240)
 
         # ========================================================================
         # ============================username====================================
