@@ -1,263 +1,124 @@
 import sqlite3
-
 from tkinter import *
-
 from PIL import ImageTk, Image
-
 import tkinter as tk
-
 from operator_landing_page import operator_landing
 
- 
-
- 
-
 win = tk.Tk()
-
 win.geometry('1166x718')
-
 win.resizable(0,0)
-
 win.state('zoomed')
-
 win.title('Login Page')
 
- 
 
 # //////////////////// ids for primary and foreign keys //////////////////////////////////
-
 customer_id=IntVar()
-
 operator_id=IntVar()
-
 manager_id=IntVar()
-
- 
 
 # ///////////////////////// customer data variables ///////////////////////////////////
 
- 
-
 customer_nameVar=StringVar()
-
 customer_surnameVar=StringVar()
-
 customer_emailVar=StringVar()
-
 customer_passVar=StringVar()
-
 customer_genderVar = IntVar()
-
 customer_contact_number=StringVar()
-
- 
 
 # //////////////////////// oerator data variables ///////////////////////////
 
- 
-
 oprtator_name=StringVar()
-
 operator_surname=StringVar()
-
 operator_address=StringVar()
-
 operator_email=StringVar()
-
 operator_passport_no=StringVar()
-
 operator_contact_no=StringVar()
-
 operator_bank_account=StringVar()
-
 operator_work_hrs=StringVar()
-
 operator_shift=StringVar()
-
 operator_allownces=StringVar()
-
 operator_manager_id=StringVar()
 
- 
-
 # ========================================================================
-
 # ============ method to add user register data in database ========================================
-
 # ========================================================================
-
-   
 
 def addNewCustomer():
-
     name=customer_nameVar.get()
-
     surname=customer_surnameVar.get()
-
     email=customer_emailVar.get()
-
     password=customer_passVar.get()
-
     gender=customer_genderVar.get()
-
- 
-
-    #prog=javaVar.get()
-
     conn = sqlite3.connect('StudentDatabase.db')
-
     with conn:
-
         cursor=conn.cursor()
-
     cursor.execute('''CREATE TABLE IF NOT EXISTS CUSTOMER_TABLE
-
                    (CUSTOMER_NAME TEXT, CUSTOMER_SURNAME TEXT,CUSTOMER_GENDER TEXT, CUSTOMER_EMAIL TEXT,CUSTOMER_PASSWORD TEXT)''')
-
     count=cursor.execute('''INSERT INTO CUSTOMER_TABLE
-
                          (CUSTOMER_NAME , CUSTOMER_SURNAME ,CUSTOMER_GENDER , CUSTOMER_EMAIL ,CUSTOMER_PASSWORD )
-
                          VALUES(?,?,?,?,?)''',
-
                          (name, surname, gender,email,password))
-
-   
-
     if(cursor.rowcount>0):
-
         print ("Signup Done")
-
         operator_landing_page.operator_landing()
-
     else:
-
         print ("Signup Error")
-
     conn.commit()
 
-   
-
 # ========================================================================
-
 # ============ method to perform login ========================================
-
 # ========================================================================
-
- 
 
 def loginNow():
-
     email=customer_emailVar.get()
-
     password=customer_passVar.get()
-
-   
-
     conn = sqlite3.connect('StudentDatabase.db')
-
     with conn:
-
         cursor=conn.cursor()
-
-   
-
     cursor.execute('Select * from CUSTOMER_TABLE Where Email=? AND Password=?',(email,password))
-
-   
-
     if cursor.fetchone() is not None:
-
         print ("Welcome")
-
     else:
-
         print ("Login failed")
-
-   
 
     conn.commit()
 
- 
-
 # ========================================================================
-
 # ============ register page ========================================
-
 # ========================================================================
-
-   
 
 def registerWindow():
-
     registerScreen=Toplevel(win)
-
-   
-
     registerScreen.title("Registration Here")
 
- 
-
     bg_frame = Image.open('images/background1.png')
-
     photo = ImageTk.PhotoImage(bg_frame)
-
     bg_panel = Label(registerScreen, image=photo)
-
     bg_panel.image = photo
-
     bg_panel.pack(fill='both', expand='yes')
-
    
-
-   
-
     reg_frame = Frame(registerScreen, bg='#d4d4ff', width=950, height=600)
-
     reg_frame.place(x=200, y=70)
-
    
-
     label = Label(reg_frame, text="Registration Here",width=20,fg="blue",font=("bold", 20))
-
     label.place(x=90,y=53)
 
- 
-
- 
-
     nameLabel = Label(reg_frame, text="Name",width=20,font=("bold", 10))
-
     nameLabel.place(x=90,y=130)
 
- 
-
     nameEntery = Entry(reg_frame,textvar=customer_nameVar)
-
     nameEntery.place(x=260,y=130)
 
- 
-
     surnameLabel = Label(reg_frame, text="Surname",width=20,font=("bold", 10))
-
     surnameLabel.place(x=90,y=160)
 
- 
-
     surnameEntery = Entry(reg_frame,textvar=customer_surnameVar)
-
     surnameEntery.place(x=260,y=160)
 
- 
-
     genderLabel = Label(reg_frame, text="Gender",width=20,font=("bold", 10))
-
     genderLabel.place(x=90,y=190)
 
- 
-
     Radiobutton(reg_frame, text="Male",padx = 5, variable=customer_genderVar, value=1).place(x=260,y=188)
-
     Radiobutton(reg_frame, text="Female",padx = 20, variable=customer_genderVar, value=2).place(x=320,y=188)
 
  
