@@ -1,20 +1,12 @@
 import sqlite3
-
 from tkinter import *
 from PIL import ImageTk, Image
 import tkinter as tk
 
- 
-
 def operator_landing():
-
     registerScreen=Toplevel(win)
 
-   
-
     registerScreen.title("Registered Here")
-
- 
 
     bg_frame = Image.open('images/background1.png')
 
