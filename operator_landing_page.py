@@ -3,7 +3,7 @@ from tkinter import *
 from PIL import ImageTk, Image
 import tkinter as tk
 
-def operator_landing():
+def operator_landing(win):
     registerScreen=Toplevel(win)
     registerScreen.title("Registered Here")
 

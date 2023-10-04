@@ -2,7 +2,9 @@ import sqlite3
 from tkinter import *
 from PIL import ImageTk, Image
 import tkinter as tk
+from tkinter import messagebox
 from operator_landing_page import operator_landing
+import os
 
 win = tk.Tk()
 win.geometry('1166x718')
@@ -49,18 +51,23 @@ def addNewCustomer():
     email=customer_emailVar.get()
     password=customer_passVar.get()
     gender=customer_genderVar.get()
-    conn = sqlite3.connect('StudentDatabase.db')
+
+    print("Called add customer method")
+    conn = sqlite3.connect('Database.db')
     with conn:
         cursor=conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS CUSTOMER_TABLE
                    (CUSTOMER_NAME TEXT, CUSTOMER_SURNAME TEXT,CUSTOMER_GENDER TEXT, CUSTOMER_EMAIL TEXT,CUSTOMER_PASSWORD TEXT)''')
+    print("Table created")
     count=cursor.execute('''INSERT INTO CUSTOMER_TABLE
-                         (CUSTOMER_ID INTEGER PRIMARY KEY, CUSTOMER_NAME , CUSTOMER_SURNAME ,CUSTOMER_GENDER , CUSTOMER_EMAIL ,CUSTOMER_PASSWORD )
-                         VALUES(id,?,?,?,?,?)''',
+                         (CUSTOMER_NAME , CUSTOMER_SURNAME ,CUSTOMER_GENDER , CUSTOMER_EMAIL ,CUSTOMER_PASSWORD )
+                         VALUES(?,?,?,?,?)''',
                          (name, surname, gender,email,password))
+    print("Data inserted")
     if(cursor.rowcount>0):
         print ("Signup Done")
-        operator_landing_page.operator_landing()
+        loginNow()
+        messagebox.showinfo("You have registered successfully. Now Login")
     else:
         print ("Signup Error")
     conn.commit()
@@ -72,16 +79,29 @@ def addNewCustomer():
 def loginNow():
     email=customer_emailVar.get()
     password=customer_passVar.get()
-    conn = sqlite3.connect('StudentDatabase.db')
+    conn = sqlite3.connect('Database.db')
     with conn:
         cursor=conn.cursor()
-    cursor.execute('Select * from CUSTOMER_TABLE Where Email=? AND Password=?',(email,password))
-    if cursor.fetchone() is not None:
-        print ("Welcome")
+    cursor.execute('Select CUSTOMER_PASSWORD from CUSTOMER_TABLE Where CUSTOMER_EMAIL=?',[email])
+    check_password = cursor.fetchone()
+    if check_password == password:
+        operator_landing(win)
     else:
-        print ("Login failed")
+        messagebox.showerror("Login Failed!", "Invalid username or password.")
+        
+    '''
+        if cursor.fetchone() is not None:
+            print ("Welcome")
+            operator_landing()
+        else:
+            print ("Login failed")
+    '''
+    
 
     conn.commit()
+
+def destroywindow(fr):
+    fr.destroy()
 
 # ========================================================================
 # ============ register page ========================================
@@ -215,14 +235,14 @@ def LoginActivity():
                                     activebackground="white"
                                     , borderwidth=0, background="white", cursor="hand2")
         hide_button.place(x=280, y=65)
-        password_entry.config(show='')
+        passwordEntry.config(show='')
 
     def hide():
         show_button = Button(form_frame, image=show_image, command=show, relief=FLAT,
                                     activebackground="white"
                                     , borderwidth=0, background="white", cursor="hand2")
         show_button.place(x=280, y=65)
-        password_entry.config(show='*')
+        passwordEntry.config(show='*')
 
     show_image = ImageTk.PhotoImage \
         (file='images/show.png')
@@ -237,12 +257,13 @@ def LoginActivity():
 
     # ///////////////////// Password icon eye ///////////////////////////////
 
-    Button(form_frame, text='Login Now',width=23,bg='blue',fg='white',pady=5,command=operator_landing).place(x=60,y=120)
+    Button(form_frame, text='Login Now',width=23,bg='blue',fg='white',pady=5, command=loginNow).place(x=60,y=120)
 
     Button(form_frame,text="Have no Accout! Create one",bg="red",fg="white",font=("bold",10), command=registerWindow).place(x=60,y=170)
 
     win.mainloop()
 
+ 
  
 
 LoginActivity()
