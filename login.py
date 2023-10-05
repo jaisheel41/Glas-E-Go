@@ -41,9 +41,15 @@ operator_shift=StringVar()
 operator_allownces=StringVar()
 operator_manager_id=StringVar()
 
+# ////////////////////// to destroy a window ///////////////////////////////
+
+def destroywindow(fr):
+    fr.destroy()
+
 # ========================================================================
 # ============ method to add user register data in database ========================================
 # ========================================================================
+
 
 def addNewCustomer():
     name=customer_nameVar.get()
@@ -56,21 +62,24 @@ def addNewCustomer():
     conn = sqlite3.connect('Database.db')
     with conn:
         cursor=conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS CUSTOMER_TABLE
-                   (CUSTOMER_NAME TEXT, CUSTOMER_SURNAME TEXT,CUSTOMER_GENDER TEXT, CUSTOMER_EMAIL TEXT,CUSTOMER_PASSWORD TEXT)''')
+    cursor.execute("""CREATE TABLE IF NOT EXISTS CUSTOMER_TABLE
+                   (CUSTOMER_NAME TEXT, CUSTOMER_SURNAME TEXT,CUSTOMER_GENDER TEXT, CUSTOMER_EMAIL TEXT,CUSTOMER_PASSWORD TEXT);""")
     print("Table created")
-    count=cursor.execute('''INSERT INTO CUSTOMER_TABLE
+    count=cursor.execute("""INSERT INTO CUSTOMER_TABLE
                          (CUSTOMER_NAME , CUSTOMER_SURNAME ,CUSTOMER_GENDER , CUSTOMER_EMAIL ,CUSTOMER_PASSWORD )
-                         VALUES(?,?,?,?,?)''',
+                         VALUES(?,?,?,?,?)""",
                          (name, surname, gender,email,password))
     print("Data inserted")
     if(cursor.rowcount>0):
         print ("Signup Done")
-        loginNow()
-        messagebox.showinfo("You have registered successfully. Now Login")
+        #LoginActivity()
+        messagebox.showinfo("Success!!!","You have registered successfully. Now Login")
+        #registerScreen.destroy()
     else:
         print ("Signup Error")
+    
     conn.commit()
+    
 
 # ========================================================================
 # ============ method to perform login ========================================
@@ -82,10 +91,11 @@ def loginNow():
     conn = sqlite3.connect('Database.db')
     with conn:
         cursor=conn.cursor()
-    cursor.execute('Select CUSTOMER_PASSWORD from CUSTOMER_TABLE Where CUSTOMER_EMAIL=?',[email])
+    cursor.execute("Select CUSTOMER_PASSWORD from CUSTOMER_TABLE Where CUSTOMER_EMAIL=?",[email])
     check_password = cursor.fetchone()
-    if check_password == password:
+    if check_password[0] == password:
         operator_landing(win)
+        
     else:
         messagebox.showerror("Login Failed!", "Invalid username or password.")
         
@@ -100,8 +110,7 @@ def loginNow():
 
     conn.commit()
 
-def destroywindow(fr):
-    fr.destroy()
+
 
 # ========================================================================
 # ============ register page ========================================
@@ -154,6 +163,8 @@ def registerWindow():
     passEntry.place(x=260,y=250)
 
     Button(reg_frame, text='Submit',width=20,bg='blue',fg='white',pady=5,command=addNewCustomer).place(x=180,y=380)
+
+    #destroywindow(registerScreen)
 
 # ========================================================================
 # ============ Login Window by default (for now) ========================================
@@ -250,10 +261,16 @@ def LoginActivity():
     hide_image = ImageTk.PhotoImage \
         (file='images/hide.png')
 
-    show_button = Button(form_frame, image=show_image, command=show, relief=FLAT,
+    show_button = Button(form_frame, image=show_image, command=hide, relief=FLAT,
                                 activebackground="white"
                                 , borderwidth=0, background="white", cursor="hand2")
     show_button.place(x=280, y=65)
+
+    # //////////////////// Clear email and password entry ////////////////
+
+    emailEntry.delete(0,END)
+    passwordEntry.delete(0,END)
+
 
     # ///////////////////// Password icon eye ///////////////////////////////
 
@@ -262,8 +279,5 @@ def LoginActivity():
     Button(form_frame,text="Have no Accout! Create one",bg="red",fg="white",font=("bold",10), command=registerWindow).place(x=60,y=170)
 
     win.mainloop()
-
- 
- 
 
 LoginActivity()
