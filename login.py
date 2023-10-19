@@ -432,8 +432,9 @@ def OperatorRegisterActivity():
     # Labels and Entry widgets using grid
     
     tk.Label(operator_reg_form_frame, text="Id", width=20, font=("bold", 10)).grid(row=0, column=0)
-    nameEntery = tk.Entry(operator_reg_form_frame, textvariable=operator_nameVar)
-    nameEntery.grid(row=0, column=1)
+    idEntery = tk.Entry(operator_reg_form_frame, textvariable=operator_id, state='readonly')
+    idEntery.grid(row=0, column=1)
+    #idEntery.insert(0, generate_operator_id())
 
     tk.Label(operator_reg_form_frame, text="Name", width=20, font=("bold", 10)).grid(row=1, column=0)
     nameEntery = tk.Entry(operator_reg_form_frame, textvariable=operator_nameVar)
