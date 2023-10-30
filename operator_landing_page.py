@@ -34,6 +34,56 @@ cursor.execute('''
         is_charged BOOLEAN
     )
 ''')
+
+def remove_bike(database_file, bike_id, bike_model):
+    try:
+        conn = sqlite3.connect(database_file)
+        cursor = conn.cursor()
+
+        if bike_id is not None:
+            cursor.execute("DELETE FROM BIKES WHERE BIKE_ID = ?", (bike_id,))
+        elif bike_model is not None:
+            cursor.execute("DELETE FROM BIKES WHERE BIKE_MODEL = ?", (bike_model,))
+        else:
+            print("Please provide either bike_id or bike_model to remove a bike.")
+
+        conn.commit()
+        conn.close()
+        print("Bike removed successfully.")
+
+    except sqlite3.Error as e:
+        print(f"SQLite error: {e}")
+
+def bike_removal_UI(win):
+    def submit_removal():
+        bike_id = bike_id_entry.get()
+        bike_model = bike_model_entry.get()
+
+        if bike_id:
+            remove_bike('bikedatabase.db', bike_id=int(bike_id))
+        elif bike_model:
+            remove_bike('bikedatabase.db', bike_model=bike_model)
+        else:
+            result_label.config(text="Please provide either bike_id or bike_model.")
+    bike_removal_frame = Frame(win)
+    bike_removal_frame.title("Bike Removal UI")
+
+    tk.Label(bike_removal_frame, text="Enter Bike ID:").grid(row=0, column=0)
+    bike_id_entry = tk.Entry(bike_removal_frame)
+    bike_id_entry.grid(row=0, column=1)
+
+    tk.Label(bike_removal_frame, text="Enter Bike Model:").grid(row=1, column=0)
+    bike_model_entry = tk.Entry(bike_removal_frame)
+    bike_model_entry.grid(row=1, column=1)
+
+    submit_button = tk.Button(bike_removal_frame, text="Submit", command=submit_removal)
+    submit_button.grid(row=2, column=0, columnspan=2)
+
+    result_label = tk.Label(bike_removal_frame, text="")
+    result_label.grid(row=3, column=0, columnspan=2)
+
+
+
 def bike_registration(win):
     # Labels and Entry fields
     form_frame = Frame(win, bg='#ffe16b',width=950, height=600)
@@ -127,6 +177,9 @@ def operator_landing(win):
 
     bike_reg_button = ttk.Button(operator_landing_frame, text="Bike Registration", command=bike_registration(win))
     bike_reg_button.grid(row=8, column=0, columnspan=2, padx=5, pady=10)
+
+    bike_reg_button = ttk.Button(operator_landing_frame, text="Bike Removal", command=bike_removal_UI(win))
+    bike_reg_button.grid(row=8, column=1, columnspan=2, padx=5, pady=10)
 
     #root.mainloop()
 

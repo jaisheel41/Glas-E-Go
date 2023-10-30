@@ -54,6 +54,114 @@ conn = sqlite3.connect('Database.db')
 with conn:
     cursor=conn.cursor()
 
+# ////////////////////////////////////////// Databases created ////////////////////////////////
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS payment (
+        payment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        amount REAL,
+        payment_status BOOLEAN
+    )''')
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS customers
+             (customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              surname TEXT,
+              email TEXT,
+              password TEXT,
+              gender INTEGER,
+              address TEXT,
+              contact_number TEXT)''')
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS operators
+             (operator_id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              surname TEXT,
+              gender TEXT,
+              address TEXT,
+              email TEXT,
+              passport_no TEXT,
+              contact TEXT,
+              bank_account TEXT,
+              working_hours TEXT,
+              shift TEXT,
+              allowances TEXT,
+              manager TEXT,
+              password TEXT)''')
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS managers
+             (manager_id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              surname TEXT,
+              gender TEXT,
+              address TEXT,
+              email TEXT,
+              passport_no TEXT,
+              contact TEXT,
+              bank_account TEXT,
+              working_hours TEXT,
+              shift TEXT,
+              allowances TEXT,
+              password TEXT)''')
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS BIKES (
+        BIKE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        BIKE_TYPE TEXT,
+        BIKE_NAME TEXT,
+        BIKE_MODEL TEXT,
+        BIKE_LOCATION TEXT,
+        is_available BOOLEAN,
+        is_servicing BOOLEAN,
+        is_charged BOOLEAN
+    )
+''')
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_util (
+        id INTEGER,
+        bike_id INTEGER,
+        alloted_time DATETIME,
+        return_time DATETIME,
+        payment_id INTEGER,
+        is_offer BOOLEAN,
+        payment_status BOOLEAN,
+        FOREIGN KEY (id) REFERENCES customers(id),
+        FOREIGN KEY (bike_id) REFERENCES bikes(bike_id),
+        FOREIGN KEY (payment_id) REFERENCES payment(payment_id)
+    )''')
+
+'''
+# Insert data for managers
+managers_data = [
+    ("John Doe", "manager1@example.com", "male", "123 Manager St.", "manager1@example.com", "MGR123", "1234567890", "123-456-789", "9-5", "Day", "$1000", "manager1password"),
+    ("Jane Smith", "manager2@example.com", "female", "456 Manager Ave.", "manager2@example.com", "MGR456", "9876543210", "987-654-321", "8-4", "Day", "$1200", "manager2password"),
+    ("Bob Johnson", "manager3@example.com", "male", "789 Manager Rd.", "manager3@example.com", "MGR789", "5555555555", "555-555-555", "10-6", "Night", "$800", "manager3password")
+]
+
+cursor.executemany("INSERT INTO managers (name, surname, gender, address, email, passport_no, contact, bank_account, working_hours, shift, allowances, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", managers_data)
+
+# Insert data for operators
+operators_data = [
+    ("Operator 1", "operator1@example.com", "male", "123 Operator St.", "operator1@example.com", "OPR123", "1234567890", "123-456-789", "9-5", "Day", "$100", "Manager 1", "operator1password"),
+    ("Operator 2", "operator2@example.com", "female", "456 Operator Ave.", "operator2@example.com", "OPR456", "9876543210", "987-654-321", "8-4", "Day", "$120", "Manager 2", "operator2password"),
+    ("Operator 3", "operator3@example.com", "male", "789 Operator Rd.", "operator3@example.com", "OPR789", "5555555555", "555-555-555", "10-6", "Night", "$80", "Manager 3", "operator3password")
+]
+
+cursor.executemany("INSERT INTO operators (name, surname, gender, address, email, passport_no, contact, bank_account, working_hours, shift, allowances, manager, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", operators_data)
+
+# Insert data for customers
+customers_data = [
+    ("Alice", "customer1@example.com", "female", "123 Customer St.", "customer1@example.com", 1234567890, "customer1password"),
+    ("Bob", "customer2@example.com", "male", "456 Customer Ave.", "customer2@example.com", 9876543210, "customer2password"),
+    ("Carol", "customer3@example.com", "female", "789 Customer Rd.", "customer3@example.com", 5555555555, "customer3password"),
+    ("David", "customer4@example.com", "male", "101 Customer Ln.", "customer4@example.com", 1111111111, "customer4password"),
+    ("Eve", "customer5@example.com", "female", "202 Customer Blvd.", "customer5@example.com", 2222222222, "customer5password")
+]
+
+cursor.executemany("INSERT INTO customers (name, email, gender, address, email, contact_number, password) VALUES (?, ?, ?, ?, ?, ?, ?)", customers_data)
+
+'''
+
 
 # ////////////////////// to destroy a window ///////////////////////////////
 
@@ -82,9 +190,7 @@ def generate_manager_id():
     max_id = cursor.fetchone()[0]
     return max_id + 1 if max_id else 1
 # //////////////////////////////////////////////////////////////////////////////////////
-conn = sqlite3.connect('Database.db')
-with conn:
-    cursor=conn.cursor()
+
 cursor.execute("""CREATE TABLE IF NOT EXISTS CUSTOMER_TABLE
                 (CUSTOMER_ID INTEGER PRIMARY KEY AUTOINCREMENT,CUSTOMER_NAME TEXT, CUSTOMER_SURNAME TEXT,CUSTOMER_GENDER TEXT, CUSTOMER_EMAIL TEXT,CUSTOMER_PASSWORD TEXT);""")
 print("Table created")
@@ -219,7 +325,7 @@ def LoginActivity():
     # ============================background image============================
     # ========================================================================
 
-    bg_frame = Image.open('images/background1.png')
+    bg_frame = Image.open('images/background3.png')
     photo = ImageTk.PhotoImage(bg_frame)
     bg_panel = Label(win, image=photo)
     bg_panel.image = photo
@@ -411,77 +517,157 @@ def OperatorRegisterActivity():
     photo = ImageTk.PhotoImage(bg_frame)
     bg_panel = Label(OpregisterScreen, image=photo)
     bg_panel.image = photo
-    bg_panel.pack(fill='both', expand='yes')
+    bg_panel.pack(fill='both', expand='yes') 
     
     #OperatorLoginActivity.lgn_frame_op.destroy()
     
     label = Label(OpregisterScreen, text="Registration Here",width=20,fg="blue",font=("bold", 20))
-    label.place(x=90,y=53)
+    label.place(x=150,y=53)
 
-    reg_frame = Frame(OpregisterScreen, bg='#d4d4ff', width=950, height=600)
-    reg_frame.place(x=200, y=90)
+    reg_frame_op = Frame(OpregisterScreen, bg='#d4d4ff', width=800, height=500)
+    reg_frame_op.place(x=470, y=200)
+
+    reg_form_frame = Frame(reg_frame_op, bg='#d4d4ff', width=950, height=600)
+    reg_form_frame.place(x=200, y=120)
 
     '''reg_frame = tk.Frame(window)
     reg_frame.pack(padx=20, pady=20)'''
 
     # Labels and Entry widgets using grid
     
-    tk.Label(reg_frame, text="Id", width=20, font=("bold", 10)).grid(row=0, column=0)
-    nameEntery = tk.Entry(reg_frame, textvariable=operator_nameVar)
+    tk.Label(reg_form_frame, text="Id", width=20, font=("bold", 10)).grid(row=0, column=0)
+    nameEntery = tk.Entry(reg_form_frame, textvariable=operator_nameVar)
     nameEntery.grid(row=0, column=1)
 
-    tk.Label(reg_frame, text="Name", width=20, font=("bold", 10)).grid(row=1, column=0)
-    nameEntery = tk.Entry(reg_frame, textvariable=operator_nameVar)
+    tk.Label(reg_form_frame, text="Name", width=20, font=("bold", 10)).grid(row=1, column=0)
+    nameEntery = tk.Entry(reg_form_frame, textvariable=operator_nameVar)
     nameEntery.grid(row=1, column=1)
 
-    tk.Label(reg_frame, text="Surname", width=20, font=("bold", 10)).grid(row=2, column=0)
-    surnameEntery = tk.Entry(reg_frame, textvariable=operator_surnameVar)
+    tk.Label(reg_form_frame, text="Surname", width=20, font=("bold", 10)).grid(row=2, column=0)
+    surnameEntery = tk.Entry(reg_form_frame, textvariable=operator_surnameVar)
     surnameEntery.grid(row=2, column=1)
 
-    tk.Label(reg_frame, text="Gender", width=20, font=("bold", 10)).grid(row=3, column=0)
-    tk.Radiobutton(reg_frame, text="Male", padx=5, variable=operator_gendervar, value=1).grid(row=3, column=1)
-    tk.Radiobutton(reg_frame, text="Female", padx=20, variable=operator_gendervar, value=2).grid(row=3, column=2)
+    tk.Label(reg_form_frame, text="Gender", width=20, font=("bold", 10)).grid(row=3, column=0)
+    tk.Radiobutton(reg_form_frame, text="Male", padx=5, variable=operator_gendervar, value=1).grid(row=3, column=1)
+    tk.Radiobutton(reg_form_frame, text="Female", padx=20, variable=operator_gendervar, value=2).grid(row=3, column=2)
 
-    tk.Label(reg_frame, text="Email", width=20, font=("bold", 10)).grid(row=4, column=0)
-    emailEntry = tk.Entry(reg_frame, textvariable=operator_emailVar)
+    tk.Label(reg_form_frame, text="Email", width=20, font=("bold", 10)).grid(row=4, column=0)
+    emailEntry = tk.Entry(reg_form_frame, textvariable=operator_emailVar)
     emailEntry.grid(row=4, column=1)
 
-    tk.Label(reg_frame, text="Passport No", width=20, font=("bold", 10)).grid(row=5, column=0)
-    passportEntry = tk.Entry(reg_frame, textvariable=operator_passportnoVar)
+    tk.Label(reg_form_frame, text="Passport No", width=20, font=("bold", 10)).grid(row=5, column=0)
+    passportEntry = tk.Entry(reg_form_frame, textvariable=operator_passportnoVar)
     passportEntry.grid(row=5, column=1)
 
-    tk.Label(reg_frame, text="Contact No", width=20, font=("bold", 10)).grid(row=6, column=0)
-    contactEntry = tk.Entry(reg_frame, textvariable=operator_contactVar)
+    tk.Label(reg_form_frame, text="Contact No", width=20, font=("bold", 10)).grid(row=6, column=0)
+    contactEntry = tk.Entry(reg_form_frame, textvariable=operator_contactVar)
     contactEntry.grid(row=6, column=1)
 
-    tk.Label(reg_frame, text="Bank Account", width=20, font=("bold", 10)).grid(row=7, column=0)
-    bankEntry = tk.Entry(reg_frame, textvariable=operator_bankaccountVar)
+    tk.Label(reg_form_frame, text="Bank Account", width=20, font=("bold", 10)).grid(row=7, column=0)
+    bankEntry = tk.Entry(reg_form_frame, textvariable=operator_bankaccountVar)
     bankEntry.grid(row=7, column=1)
 
-    tk.Label(reg_frame, text="Working Hours", width=20, font=("bold", 10)).grid(row=8, column=0)
-    workingHrsEntry = tk.Entry(reg_frame, textvariable=operator_workinghoursVar)
+    tk.Label(reg_form_frame, text="Working Hours", width=20, font=("bold", 10)).grid(row=8, column=0)
+    workingHrsEntry = tk.Entry(reg_form_frame, textvariable=operator_workinghoursVar)
     workingHrsEntry.grid(row=8, column=1)
 
-    tk.Label(reg_frame, text="Shift Hours", width=20, font=("bold", 10)).grid(row=9, column=0)
-    shiftEntry = tk.Entry(reg_frame, textvariable=operator_shiftVar)
+    tk.Label(reg_form_frame, text="Shift Hours", width=20, font=("bold", 10)).grid(row=9, column=0)
+    shiftEntry = tk.Entry(reg_form_frame, textvariable=operator_shiftVar)
     shiftEntry.grid(row=9, column=1)
 
-    tk.Label(reg_frame, text="Allowances", width=20, font=("bold", 10)).grid(row=10, column=0)
-    allowanceEntry = tk.Entry(reg_frame, textvariable=operator_allowancesVar)
+    tk.Label(reg_form_frame, text="Allowances", width=20, font=("bold", 10)).grid(row=10, column=0)
+    allowanceEntry = tk.Entry(reg_form_frame, textvariable=operator_allowancesVar)
     allowanceEntry.grid(row=10, column=1)
 
-    tk.Label(reg_frame, text="Manager", width=20, font=("bold", 10)).grid(row=11, column=0)
-    managerEntry = tk.Entry(reg_frame, textvariable=operator_managerVar)
+    tk.Label(reg_form_frame, text="Manager", width=20, font=("bold", 10)).grid(row=11, column=0)
+    managerEntry = tk.Entry(reg_form_frame, textvariable=operator_managerVar)
     managerEntry.grid(row=11, column=1)
 
-    tk.Label(reg_frame, text="Password", width=20, font=("bold", 10)).grid(row=12, column=0)
-    passEntry = tk.Entry(reg_frame, textvariable=operator_passwordVar, show='*')
+    tk.Label(reg_form_frame, text="Password", width=20, font=("bold", 10)).grid(row=12, column=0)
+    passEntry = tk.Entry(reg_form_frame, textvariable=operator_passwordVar, show='*')
     passEntry.grid(row=12, column=1)
 
-    tk.Button(reg_frame, text='Submit', width=20, bg='blue', fg='white', pady=5, command=addOperator).grid(row=13, column=1)
+    tk.Button(reg_form_frame, text='Submit', width=20, bg='blue', fg='white', pady=5, command=addOperator).grid(row=13, column=1)
 
 
     #destroywindow(registerScreen)
+def ManagerRegisterActivity():
+    mnregisterScreen=Toplevel(win)
+    mnregisterScreen.title("Registration Operator Here")
+
+    
+    bg_frame = Image.open('images/background1.png')
+    photo = ImageTk.PhotoImage(bg_frame)
+    bg_panel = Label(mnregisterScreen, image=photo)
+    bg_panel.image = photo
+    bg_panel.pack(fill='both', expand='yes') 
+    
+    #OperatorLoginActivity.lgn_frame_op.destroy()
+    
+    label = Label(mnregisterScreen, text="Registration Here",width=20,fg="blue",font=("bold", 20))
+    label.place(x=150,y=53)
+
+    reg_frame_mn = Frame(mnregisterScreen, bg='#d4d4ff', width=800, height=500)
+    reg_frame_mn.place(x=470, y=200)
+
+    reg_form_frame = Frame(reg_frame_mn, bg='#d4d4ff', width=950, height=600)
+    reg_form_frame.place(x=200, y=120)
+
+    '''reg_frame = tk.Frame(window)
+    reg_frame.pack(padx=20, pady=20)'''
+
+    # Labels and Entry widgets using grid
+    
+    tk.Label(reg_form_frame, text="Id", width=20, font=("bold", 10)).grid(row=0, column=0)
+    nameEntery = tk.Entry(reg_form_frame, textvariable=operator_nameVar)
+    nameEntery.grid(row=0, column=1)
+
+    tk.Label(reg_form_frame, text="Name", width=20, font=("bold", 10)).grid(row=1, column=0)
+    nameEntery = tk.Entry(reg_form_frame, textvariable=operator_nameVar)
+    nameEntery.grid(row=1, column=1)
+
+    tk.Label(reg_form_frame, text="Surname", width=20, font=("bold", 10)).grid(row=2, column=0)
+    surnameEntery = tk.Entry(reg_form_frame, textvariable=operator_surnameVar)
+    surnameEntery.grid(row=2, column=1)
+
+    tk.Label(reg_form_frame, text="Gender", width=20, font=("bold", 10)).grid(row=3, column=0)
+    tk.Radiobutton(reg_form_frame, text="Male", padx=5, variable=operator_gendervar, value=1).grid(row=3, column=1)
+    tk.Radiobutton(reg_form_frame, text="Female", padx=20, variable=operator_gendervar, value=2).grid(row=3, column=2)
+
+    tk.Label(reg_form_frame, text="Email", width=20, font=("bold", 10)).grid(row=4, column=0)
+    emailEntry = tk.Entry(reg_form_frame, textvariable=operator_emailVar)
+    emailEntry.grid(row=4, column=1)
+
+    tk.Label(reg_form_frame, text="Passport No", width=20, font=("bold", 10)).grid(row=5, column=0)
+    passportEntry = tk.Entry(reg_form_frame, textvariable=operator_passportnoVar)
+    passportEntry.grid(row=5, column=1)
+
+    tk.Label(reg_form_frame, text="Contact No", width=20, font=("bold", 10)).grid(row=6, column=0)
+    contactEntry = tk.Entry(reg_form_frame, textvariable=operator_contactVar)
+    contactEntry.grid(row=6, column=1)
+
+    tk.Label(reg_form_frame, text="Bank Account", width=20, font=("bold", 10)).grid(row=7, column=0)
+    bankEntry = tk.Entry(reg_form_frame, textvariable=operator_bankaccountVar)
+    bankEntry.grid(row=7, column=1)
+
+    tk.Label(reg_form_frame, text="Working Hours", width=20, font=("bold", 10)).grid(row=8, column=0)
+    workingHrsEntry = tk.Entry(reg_form_frame, textvariable=operator_workinghoursVar)
+    workingHrsEntry.grid(row=8, column=1)
+
+    tk.Label(reg_form_frame, text="Shift Hours", width=20, font=("bold", 10)).grid(row=9, column=0)
+    shiftEntry = tk.Entry(reg_form_frame, textvariable=operator_shiftVar)
+    shiftEntry.grid(row=9, column=1)
+
+    tk.Label(reg_form_frame, text="Allowances", width=20, font=("bold", 10)).grid(row=10, column=0)
+    allowanceEntry = tk.Entry(reg_form_frame, textvariable=operator_allowancesVar)
+    allowanceEntry.grid(row=10, column=1)
+
+    tk.Label(reg_form_frame, text="Password", width=20, font=("bold", 10)).grid(row=12, column=0)
+    passEntry = tk.Entry(reg_form_frame, textvariable=operator_passwordVar, show='*')
+    passEntry.grid(row=12, column=1)
+
+    tk.Button(reg_form_frame, text='Submit', width=20, bg='blue', fg='white', pady=5, command=addOperator).grid(row=13, column=1)
+
 
 
 def OperatorLoginActivity():
@@ -573,8 +759,6 @@ def OperatorLoginActivity():
 
     emailEntry.delete(0,END)
     passwordEntry.delete(0,END)
-
-
     # ///////////////////// Password icon eye ///////////////////////////////
 
     Button(form_frame, text='Login Now',width=23,bg='blue',fg='white',pady=5, command=loginNowOp).place(x=60,y=120)
@@ -675,9 +859,9 @@ def ManagerLoginActivity():
 
     # ///////////////////// Password icon eye ///////////////////////////////
 
-    Button(form_frame, text='Login Now',width=23,bg='blue',fg='white',pady=5, command=loginNowOp).place(x=60,y=120)
+    Button(form_frame, text='Login Now',width=23,bg='blue',fg='white',pady=5, command=ManagerLoginActivity).place(x=60,y=120)
 
-    Button(form_frame,text="Have no Accout! Create one",bg="red",fg="white",font=("bold",10), command=OperatorRegisterActivity).place(x=60,y=170)
+    Button(form_frame,text="Have no Accout! Create one",bg="red",fg="white",font=("bold",10), command=ManagerRegisterActivity).place(x=60,y=170)
 
 
 
