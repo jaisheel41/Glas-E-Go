@@ -1,94 +1,61 @@
 import tkinter as tk
 from tkinter import ttk
-import sqlite3
 from tkinter import *
-from PIL import Image, ImageTk
+import sqlite3
+from tkinter import messagebox
+import random
+import time
 
-'''
+# Connect to the SQLite database
+conn = sqlite3.connect("bike_database.db")
+cursor = conn.cursor()
 
-root = tk.Tk()
-root.title("Operator landing page")
-# Create the main application window'''
-
-
-# Function to generate the next available bike ID
 def generate_bike_id():
     cursor.execute("SELECT MAX(BIKE_ID) FROM bikes")
     max_id = cursor.fetchone()[0]
     return max_id + 1 if max_id else 1
 
-# SQLite Database
-conn = sqlite3.connect('bikedatabase.db')
-cursor = conn.cursor()
-
 # Create the table if it doesn't exist
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS BIKES (
-        BIKE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        BIKE_TYPE TEXT,
-        BIKE_NAME TEXT,
-        BIKE_MODEL TEXT,
-        BIKE_LOCATION TEXT,
-        is_available BOOLEAN,
-        is_servicing BOOLEAN,
-        is_charged BOOLEAN
-    )
-''')
 
-def remove_bike(database_file, bike_id, bike_model):
-    try:
-        conn = sqlite3.connect(database_file)
-        cursor = conn.cursor()
+def bike_removal(root):
+    removal_form_frame = Frame(root, bg='#ffe16b',width=950, height=600)
+    removal_form_frame.place(x=470, y=200)
+    txt = "BIKE REMOVAL"
+    heading = Label(root, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
+                                fg='black',
+                                bd=10,
+                                relief=FLAT)
+    heading.place(x=300, y=30, width=300, height=30)
 
-        if bike_id is not None:
-            cursor.execute("DELETE FROM BIKES WHERE BIKE_ID = ?", (bike_id,))
-        elif bike_model is not None:
-            cursor.execute("DELETE FROM BIKES WHERE BIKE_MODEL = ?", (bike_model,))
-        else:
-            print("Please provide either bike_id or bike_model to remove a bike.")
+    bikeid_label = ttk.Label(removal_form_frame, text="Bike Type")
+    bikeid_entry = ttk.Entry(removal_form_frame)
+    bikeid_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
+    bikeid_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
 
-        conn.commit()
-        conn.close()
-        print("Bike removed successfully.")
-
-    except sqlite3.Error as e:
-        print(f"SQLite error: {e}")
-
-def bike_removal_UI(win):
-    def submit_removal():
-        bike_id = bike_id_entry.get()
-        bike_model = bike_model_entry.get()
-
+    def remove_bike():
+        bike_id = bikeid_entry.get()
         if bike_id:
-            remove_bike('bikedatabase.db', bike_id=int(bike_id))
-        elif bike_model:
-            remove_bike('bikedatabase.db', bike_model=bike_model)
+                try:
+                    # Execute the SQL query to delete the bike with the specified ID
+                    cursor.execute("DELETE FROM bikes WHERE bike_id=?", (bike_id,))
+                    conn.commit()
+                    bikeid_entry.delete(0, 'end')
+                    # Optionally, show a confirmation message
+                    messagebox.showinfo("Bike Removed", f"Bike with ID {bike_id} has been removed.")
+                except sqlite3.Error as e:
+                    # Handle any potential database errors
+                    messagebox.showerror("Error", "An error occurred while removing the bike.")
         else:
-            result_label.config(text="Please provide either bike_id or bike_model.")
-    bike_removal_frame = Frame(win)
-    bike_removal_frame.title("Bike Removal UI")
+            messagebox.showerror("Error", "Please enter a valid Bike ID.")
 
-    tk.Label(bike_removal_frame, text="Enter Bike ID:").grid(row=0, column=0)
-    bike_id_entry = tk.Entry(bike_removal_frame)
-    bike_id_entry.grid(row=0, column=1)
-
-    tk.Label(bike_removal_frame, text="Enter Bike Model:").grid(row=1, column=0)
-    bike_model_entry = tk.Entry(bike_removal_frame)
-    bike_model_entry.grid(row=1, column=1)
-
-    submit_button = tk.Button(bike_removal_frame, text="Submit", command=submit_removal)
-    submit_button.grid(row=2, column=0, columnspan=2)
-
-    result_label = tk.Label(bike_removal_frame, text="")
-    result_label.grid(row=3, column=0, columnspan=2)
-
+    submit_button = ttk.Button(removal_form_frame, text="Remove Bike", command=remove_bike)
+    submit_button.grid(row=1, column=0, columnspan=2, padx=5, pady=10)
 
 
 def bike_registration(win):
     # Labels and Entry fields
     form_frame = Frame(win, bg='#ffe16b',width=950, height=600)
     form_frame.place(x=470, y=200)
-
 
     txt = "BIKE REGISTRATION"
     heading = Label(win, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
@@ -155,33 +122,116 @@ def bike_registration(win):
     submit_button = ttk.Button(form_frame, text="Submit", command=insert_data)
     submit_button.grid(row=8, column=0, columnspan=2, padx=5, pady=10)
 
-def operator_landing(win):
-
-    background_image = Image.open('images/background1.png') 
-    background_photo = ImageTk.PhotoImage(background_image)
-    background_label = ttk.Label(win, image=background_photo)
-    background_label.place(x=0, y=0, relwidth=1, relheight=1)
-    background_label.image = background_photo
-
+def open_operator_window(root):
+    # Create a new window for the operator
+    operator_window = tk.Toplevel(root)
+    operator_window.title("Operator Dashboard")
     
-    operator_landing_frame = Frame(win, bg='#d4d4ff',width=950, height=600)
-    operator_landing_frame.place(x=470, y=200)
+    # Welcome Label
+    welcome_label = tk.Label(operator_window, text="Welcome Operator")
+    welcome_label.pack(pady=20)
+    
+    # Buttons to Add and Remove Bikes
+    add_bikes_button = tk.Button(operator_window, text="Add Bikes", command=bike_registration(root))
+    remove_bikes_button = tk.Button(operator_window, text="Remove Bikes", command=bike_removal(root))
+    
+    add_bikes_button.pack(pady=10)
+    remove_bikes_button.pack(pady=10)
+
+    # Fetch bike information from the database
+    cursor.execute("SELECT * FROM bikes")
+    bike_data = cursor.fetchall()
 
 
-    txt = "Select Operations on bikes"
-    heading = Label(win, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
-                                fg='black',
-                                bd=10,
-                                relief=FLAT)
-    heading.place(x=300, y=30, width=500, height=30)
+# ---------------------------------------------------------------------------------------------------------------------------
+# -------------------------------------####### Charging Functionality ########-----------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
 
-    bike_reg_button = ttk.Button(operator_landing_frame, text="Bike Registration", command=bike_registration(win))
-    bike_reg_button.grid(row=8, column=0, columnspan=2, padx=5, pady=10)
+    # Function to handle the "Charge" button click
+    def charge_action(bike_id):
+        # Disable is_available and is_charged in the bikes table
+        cursor.execute("UPDATE bikes SET is_available = 0, is_charged = 0 WHERE bike_id = ?", (bike_id,))
+        conn.commit()
+        charge_button.config(state=tk.DISABLED)
+        # Simulate a 5-second charging delay
+        time.sleep(5)
 
-    bike_reg_button = ttk.Button(operator_landing_frame, text="Bike Removal", command=bike_removal_UI(win))
-    bike_reg_button.grid(row=8, column=1, columnspan=2, padx=5, pady=10)
+        # Enable is_available and is_charged in the bikes table
+        cursor.execute("UPDATE bikes SET is_available = 1, is_charged = 1 WHERE bike_id = ?", (bike_id,))
+        conn.commit()
+        charge_button.config(state=tk.NORMAL)
+        # Show a message confirming the bike is charged and available
+        messagebox.showinfo("Bike Charged", f"Bike {bike_id} is now charged and available.")
+        # messagebox.showinfo("Charge Bike", f"Charge the bike with ID: {bike_id}")
 
-    #root.mainloop()
+# ---------------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------####### Repair Functionality ########-----------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
+
+    # Function to handle the "Repair" button click
+    def repair_action(bike_id):
+        cursor.execute("UPDATE bikes SET is_servicing = 1, is_available = 0 WHERE bike_id = ?", (bike_id,))
+        conn.commit()
+        repair_button.config(state=tk.DISABLED)
+        # Simulate a 5-second charging delay
+        time.sleep(5)
+        # Enable is_available and is_charged in the bikes table
+        cursor.execute("UPDATE bikes SET is_servicing = 0, is_available = 1 WHERE bike_id = ?", (bike_id,))
+        conn.commit()
+        repair_button.config(state=tk.NORMAL)
+        # Show a message confirming the bike is charged and available
+        messagebox.showinfo("Bike Charged", f"Bike {bike_id} is now charged and available.")
+        # messagebox.showinfo("Repair Bike", f"Repair the bike with ID: {bike_id}")
+
+# ---------------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------####### Pickup Functionality ########-----------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
+
+    # Function to handle the "Pick Up" button click
+    def pickup_action(bike_id):
+        cursor.execute("UPDATE bikes SET is_available = 0 WHERE bike_id = ?", (bike_id,))
+        conn.commit()
+        repair_button.config(state=tk.DISABLED)
+        # Simulate a 5-second charging delay
+        time.sleep(5)
+        # Enable is_available and is_charged in the bikes table
+        cursor.execute("UPDATE bikes SET is_available = 1 WHERE bike_id = ?", (bike_id,))
+        conn.commit()
+        repair_button.config(state=tk.NORMAL)
+        # Show a message confirming the bike is charged and available
+        messagebox.showinfo("Pick Up Bike", f"Pick up the bike with ID: {bike_id}")
+
+# ---------------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------####### Tracking Functionality ########---------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------
+
+    # Create and display rows for each bike
+    for bike in bike_data:
+        bike_id, name, bike_type, model = bike
+
+        row_frame = tk.Frame(root)
+        row_frame.pack()
+
+        name_label = tk.Label(row_frame, text=f"Name: {name}")
+        name_label.pack(side=tk.LEFT)
+
+        type_label = tk.Label(row_frame, text=f"Type: {bike_type}")
+        type_label.pack(side=tk.LEFT)
+
+        model_label = tk.Label(row_frame, text=f"Model: {model}")
+        model_label.pack(side=tk.LEFT)
+
+        charge_button = tk.Button(row_frame, text="Charge", command=lambda bike_id=bike_id: charge_action(bike_id))
+        charge_button.pack(side=tk.LEFT)
+
+        repair_button = tk.Button(row_frame, text="Repair", command=lambda bike_id=bike_id: repair_action(bike_id))
+        repair_button.pack(side=tk.LEFT)
+
+        pickup_button = tk.Button(row_frame, text="Pick Up", command=lambda bike_id=bike_id: pickup_action(bike_id))
+        pickup_button.pack(side=tk.LEFT)
 
 
-#operator_landing()
+
+
+
+

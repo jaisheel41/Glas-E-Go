@@ -1,9 +1,10 @@
 import sqlite3
 from tkinter import *
-from PIL import ImageTk, Image
 import tkinter as tk
 from tkinter import messagebox
 from operator_landing_page import *
+from PIL import ImageTk
+from PIL import Image
 import os
 
 win = tk.Tk()
@@ -11,8 +12,6 @@ win.geometry('1166x718')
 win.resizable(0,0)
 win.state('zoomed')
 win.title('Login Page')
-
-
 
 # //////////////////// ids for primary and foreign keys //////////////////////////////////
 customer_id=IntVar()
@@ -237,15 +236,12 @@ def loginNow():
     cursor.execute("SELECT * FROM customers WHERE email = ? AND password = ?", (email, password))
     check_password = cursor.fetchone()
     if check_password[0] == password:
-        operator_landing(win)
+        messagebox.showerror("Success", "The customer logged in.")
+        # operator_landing(win)
     else:
         messagebox.showerror("Login Failed!", "Invalid username or password.")
 
     conn.commit()
-
-
-    
-
 
 # ========================================================================
 # ============ register page ========================================
@@ -469,8 +465,7 @@ def loginNowOp():
     cursor.execute("SELECT * FROM operators WHERE email = ? AND password = ?", (email, password))
     check_password = cursor.fetchone()
     if check_password[0] == password:
-        operator_landing(win)
-        
+        open_operator_window(win)
     else:
         messagebox.showerror("Login Failed!", "Invalid username or password.")
         
