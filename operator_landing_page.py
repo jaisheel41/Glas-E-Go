@@ -37,8 +37,9 @@ def tracking_functionality(operator_window):
     location_dropdown.pack()
 
     # Create a function to update the bike list when a location is selected
-    def update_bike_list(event):
+    def update_bike_list(*args):
         selected_location = location_var.get()
+        print(selected_location)
         bikes = get_bikes_at_location(selected_location)
         update_bike_display(bikes)
 
@@ -49,22 +50,26 @@ def tracking_functionality(operator_window):
     labels_frame.pack()
     labels = ["Bike ID", "Type", "Name", "Model", "Available for Rent", "Is Servicing Needed", "Is Bike Charged"]
     for label in labels:
-        tk.Label(labels_frame, text=label, padx=10).pack(side=tk.LEFT)
+        tk.Label(labels_frame, text=label, padx=10).pack(side=tk.LEFT) 
 
     # Create a function to update the bike details display
     def update_bike_display(bikes):
+        print(len(bikes))
         for widget in bike_display_frame.winfo_children():
             widget.destroy()
 
         for bike in bikes:
-            bike_id, bike_type, bike_name, bike_model, available, servicing, charged = bike
-            tk.Label(bike_display_frame, text=bike_id, padx=10).pack(side=tk.LEFT)
-            tk.Label(bike_display_frame, text=bike_type, padx=10).pack(side=tk.LEFT)
-            tk.Label(bike_display_frame, text=bike_name, padx=10).pack(side=tk.LEFT)
-            tk.Label(bike_display_frame, text=bike_model, padx=10).pack(side=tk.LEFT)
-            tk.Label(bike_display_frame, text=available, padx=10).pack(side=tk.LEFT)
-            tk.Label(bike_display_frame, text=servicing, padx=10).pack(side=tk.LEFT)
-            tk.Label(bike_display_frame, text=charged, padx=10).pack(side=tk.LEFT)
+            print(len(bike))
+            bike_id, bike_type, bike_name, bike_model, location, available, servicing, charged = bike
+            row_frame = tk.Frame(bike_display_frame)
+            row_frame.pack()
+            tk.Label(row_frame, text=bike_id, padx=10).pack(side=tk.LEFT)
+            tk.Label(row_frame, text=bike_type, padx=10).pack(side=tk.LEFT)
+            tk.Label(row_frame, text=bike_name, padx=10).pack(side=tk.LEFT)
+            tk.Label(row_frame, text=bike_model, padx=10).pack(side=tk.LEFT)
+            tk.Label(row_frame, text=available, padx=10).pack(side=tk.LEFT)
+            tk.Label(row_frame, text=servicing, padx=10).pack(side=tk.LEFT)
+            tk.Label(row_frame, text=charged, padx=10).pack(side=tk.LEFT)
 
     # Create a frame to display bike details
     bike_display_frame = tk.Frame(window)
@@ -303,7 +308,7 @@ def open_operator_window(root):
 
     titles_frame = Frame(bike_data_frame)
     titles_frame.pack()
-
+    '''
     name_title_label = tk.Label(titles_frame, text="Name")
     name_title_label.pack(side=tk.LEFT)
 
@@ -311,7 +316,10 @@ def open_operator_window(root):
     type_title_label.pack(side=tk.LEFT)
 
     model_title_label = tk.Label(titles_frame, text="Model", )
-    model_title_label.pack(side=tk.LEFT)
+    model_title_label.pack(side=tk.LEFT)'''
+    labels = ["Name", "Type", "Model", "Charge","Repair","Pickup"]
+    for label in labels:
+        tk.Label(titles_frame, text=label, padx=10).pack(side=tk.LEFT) 
 
     # Create and display rows for each bike
     for bike in bike_data:
