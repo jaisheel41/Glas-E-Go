@@ -123,12 +123,16 @@ def open_operator_window(root):
     welcome_label.place(x=150,y=53)
     
     track_add_remove_frame = Frame(operator_window_frame, bg='#d4d4ff', width=800, height=500)
-    track_add_remove_frame.place(x=470, y=300)
+    track_add_remove_frame.place(x=150, y=100)
 
     # ////////////////////////////// Bike Registration functionality ///////////////////////////////////////////////
 
     def bike_registration():
         # Labels and Entry fields
+        isavailable_var = IntVar
+        isservicing_var = IntVar
+        ischarged_var = IntVar
+
         form_frame = Frame(operator_window, bg='#ffe16b',width=950, height=600)
         form_frame.place(x=470, y=200)
 
@@ -155,9 +159,9 @@ def open_operator_window(root):
         bike_location_label = ttk.Label(form_frame, text="Bike Location")
         bike_location_entry = ttk.Entry(form_frame)
 
-        bike_isavailable_check = ttk.Checkbutton(form_frame, text="Available")
-        bike_isservicing_check = ttk.Checkbutton(form_frame, text="In Service")
-        bike_ischarged_check = ttk.Checkbutton(form_frame, text="Charged")
+        bike_isavailable_check = ttk.Checkbutton(form_frame, text="Available",variable=isavailable_var)
+        bike_isservicing_check = ttk.Checkbutton(form_frame, text="In Service", variable=isservicing_var)
+        bike_ischarged_check = ttk.Checkbutton(form_frame, text="Charged",variable=ischarged_var)
 
         bike_id_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         bike_id.grid(row=0, column=1, padx=5, pady=5, sticky='w')
@@ -178,7 +182,7 @@ def open_operator_window(root):
             cursor.execute('''
                 INSERT INTO bikes (BIKE_ID, BIKE_TYPE, BIKE_NAME, BIKE_MODEL, BIKE_LOCATION, is_available, is_servicing, is_charged)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (bike_biketype_entry.get(), bike_name_entry.get(), bike_model_entry.get(), bike_location_entry.get(), bike_isavailable_check.get(), bike_isservicing_check.get(), bike_ischarged_check.get()))
+            ''', (bike_biketype_entry.get(), bike_name_entry.get(), bike_model_entry.get(), bike_location_entry.get(), isavailable_var.get(), isservicing_var.get(), ischarged_var.get()))
             conn.commit()
             reset_form()
             bike_id.delete(0, 'end')
@@ -200,7 +204,7 @@ def open_operator_window(root):
     
     # Buttons to Add Remove and track Bikes 
     add_bikes_button = tk.Button(track_add_remove_frame, text="Add Bikes", command=bike_registration)
-    add_bikes_button.pack(pady=10)
+    add_bikes_button.grid(column=0,row=0)
 
     # //////////////////////// Bike Removal Functionality /////////////////////////////////////////////
 
@@ -240,9 +244,9 @@ def open_operator_window(root):
         submit_button.grid(row=1, column=0, columnspan=2, padx=5, pady=10)
 
     remove_bikes_button = tk.Button(track_add_remove_frame, text="Remove Bikes", command=bike_removal)
-    remove_bikes_button.pack(pady=10)
+    remove_bikes_button.grid(column=1,row=0)
     track_bikes_button = tk.Button(track_add_remove_frame, text="Track Bikes", command=tracking_functionality)
-    track_bikes_button.pack(pady=10)
+    track_bikes_button.grid(column=2,row=0)
 
     # Fetch bike information from the database
     cursor.execute("SELECT * FROM bikes")

@@ -450,7 +450,10 @@ def addOperator():
 # =====================================================================================
 # ================================== Operator Login =============================
 # =====================================================================================
-
+def opclearloginfields(email,password):
+    email.delete(0,'END')
+    password.delete(0,'END')
+    
 
 def loginNowOp():
     email=operator_emailVar.get()
