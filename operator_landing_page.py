@@ -5,6 +5,8 @@ import sqlite3
 from tkinter import messagebox
 import random
 import time
+from PIL import ImageTk
+from PIL import Image
 
 # Connect to the SQLite database
 conn = sqlite3.connect("bike_database.db")
@@ -17,11 +19,11 @@ def generate_bike_id():
 
 # Create the table if it doesn't exist
 
-def bike_removal(root):
-    removal_form_frame = Frame(root, bg='#ffe16b',width=950, height=600)
+def bike_removal(operator_window):
+    removal_form_frame = Frame(operator_window, bg='#ffe16b',width=950, height=600)
     removal_form_frame.place(x=470, y=200)
     txt = "BIKE REMOVAL"
-    heading = Label(root, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
+    heading = Label(operator_window, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
                                 fg='black',
                                 bd=10,
                                 relief=FLAT)
@@ -52,13 +54,13 @@ def bike_removal(root):
     submit_button.grid(row=1, column=0, columnspan=2, padx=5, pady=10)
 
 
-def bike_registration(win):
+def bike_registration(operator_window):
     # Labels and Entry fields
-    form_frame = Frame(win, bg='#ffe16b',width=950, height=600)
+    form_frame = Frame(operator_window, bg='#ffe16b',width=950, height=600)
     form_frame.place(x=470, y=200)
 
     txt = "BIKE REGISTRATION"
-    heading = Label(win, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
+    heading = Label(operator_window, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
                                 fg='black',
                                 bd=10,
                                 relief=FLAT)
@@ -124,16 +126,27 @@ def bike_registration(win):
 
 def open_operator_window(root):
     # Create a new window for the operator
-    operator_window = tk.Toplevel(root)
-    operator_window.title("Operator Dashboard")
+    '''operator_window = tk.Toplevel(root)
+    operator_window.title("Operator Dashboard")'''
+
+    bg_frame = Image.open('images/background3.png')
+    photo = ImageTk.PhotoImage(bg_frame)
+    bg_panel = Label(root, image=photo)
+    bg_panel.image = photo
+    bg_panel.pack(fill='both', expand='yes')
+
+    # ====== Login Frame =========================
+   
+    operator_window = Frame(root, bg='#d4d4ff', width=950, height=600)
+    operator_window.place(x=470, y=200)
     
     # Welcome Label
     welcome_label = tk.Label(operator_window, text="Welcome Operator")
     welcome_label.pack(pady=20)
     
     # Buttons to Add and Remove Bikes
-    add_bikes_button = tk.Button(operator_window, text="Add Bikes", command=bike_registration(root))
-    remove_bikes_button = tk.Button(operator_window, text="Remove Bikes", command=bike_removal(root))
+    add_bikes_button = tk.Button(operator_window, text="Add Bikes", command=bike_registration(operator_window))
+    remove_bikes_button = tk.Button(operator_window, text="Remove Bikes", command=bike_removal(operator_window))
     
     add_bikes_button.pack(pady=10)
     remove_bikes_button.pack(pady=10)
@@ -183,27 +196,13 @@ def open_operator_window(root):
         messagebox.showinfo("Bike Charged", f"Bike {bike_id} is now charged and available.")
         # messagebox.showinfo("Repair Bike", f"Repair the bike with ID: {bike_id}")
 
-# ---------------------------------------------------------------------------------------------------------------------------
-# ---------------------------------------####### Pickup Functionality ########-----------------------------------------------
-# ---------------------------------------------------------------------------------------------------------------------------
 
-    # Function to handle the "Pick Up" button click
-    def pickup_action(bike_id):
-        cursor.execute("UPDATE bikes SET is_available = 0 WHERE bike_id = ?", (bike_id,))
-        conn.commit()
-        repair_button.config(state=tk.DISABLED)
-        # Simulate a 5-second charging delay
-        time.sleep(5)
-        # Enable is_available and is_charged in the bikes table
-        cursor.execute("UPDATE bikes SET is_available = 1 WHERE bike_id = ?", (bike_id,))
-        conn.commit()
-        repair_button.config(state=tk.NORMAL)
-        # Show a message confirming the bike is charged and available
-        messagebox.showinfo("Pick Up Bike", f"Pick up the bike with ID: {bike_id}")
 
 # ---------------------------------------------------------------------------------------------------------------------------
 # ---------------------------------------####### Tracking Functionality ########---------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------------------
+def trackingBikes():
+
 
     # Create and display rows for each bike
     for bike in bike_data:
@@ -224,8 +223,46 @@ def open_operator_window(root):
         charge_button = tk.Button(row_frame, text="Charge", command=lambda bike_id=bike_id: charge_action(bike_id))
         charge_button.pack(side=tk.LEFT)
 
+        # ---------------------------------------------------------------------------------------------------------------------------
+        # ---------------------------------------####### Repair Functionality ########-----------------------------------------------
+        # ---------------------------------------------------------------------------------------------------------------------------
+
+        # Function to handle the "Repair" button click
+        def repair_action(bike_id):
+            cursor.execute("UPDATE bikes SET is_servicing = 1, is_available = 0 WHERE bike_id = ?", (bike_id,))
+            conn.commit()
+            repair_button.config(state=tk.DISABLED)
+            # Simulate a 5-second charging delay
+            time.sleep(5)
+            # Enable is_available and is_charged in the bikes table
+            cursor.execute("UPDATE bikes SET is_servicing = 0, is_available = 1 WHERE bike_id = ?", (bike_id,))
+            conn.commit()
+            repair_button.config(state=tk.NORMAL)
+            # Show a message confirming the bike is charged and available
+            messagebox.showinfo("Bike Charged", f"Bike {bike_id} is now charged and available.")
+            # messagebox.showinfo("Repair Bike", f"Repair the bike with ID: {bike_id}")
+
+
         repair_button = tk.Button(row_frame, text="Repair", command=lambda bike_id=bike_id: repair_action(bike_id))
         repair_button.pack(side=tk.LEFT)
+
+        # ---------------------------------------------------------------------------------------------------------------------------
+        # ---------------------------------------####### Pickup Functionality ########-----------------------------------------------
+        # ---------------------------------------------------------------------------------------------------------------------------
+
+        # Function to handle the "Pick Up" button click
+        def pickup_action(bike_id):
+            cursor.execute("UPDATE bikes SET is_available = 0 WHERE bike_id = ?", (bike_id,))
+            conn.commit()
+            pickup_button.config(state=tk.DISABLED)
+            # Simulate a 5-second charging delay
+            time.sleep(5)
+            # Enable is_available and is_charged in the bikes table
+            cursor.execute("UPDATE bikes SET is_available = 1 WHERE bike_id = ?", (bike_id,))
+            conn.commit()
+            pickup_button.config(state=tk.NORMAL)
+            # Show a message confirming the bike is charged and available
+            messagebox.showinfo("Pick Up Bike", f"Pick up the bike with ID: {bike_id}")
 
         pickup_button = tk.Button(row_frame, text="Pick Up", command=lambda bike_id=bike_id: pickup_action(bike_id))
         pickup_button.pack(side=tk.LEFT)

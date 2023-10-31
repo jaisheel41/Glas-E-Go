@@ -132,35 +132,31 @@ cursor.execute('''
 '''
 # Insert data for managers
 managers_data = [
-    ("John Doe", "manager1@example.com", "male", "123 Manager St.", "manager1@example.com", "MGR123", "1234567890", "123-456-789", "9-5", "Day", "$1000", "manager1password"),
-    ("Jane Smith", "manager2@example.com", "female", "456 Manager Ave.", "manager2@example.com", "MGR456", "9876543210", "987-654-321", "8-4", "Day", "$1200", "manager2password"),
-    ("Bob Johnson", "manager3@example.com", "male", "789 Manager Rd.", "manager3@example.com", "MGR789", "5555555555", "555-555-555", "10-6", "Night", "$800", "manager3password")
+    ("John", "Doe", "male", "123 Manager St.", "manager1@example.com", "MGR123", "1234567890", "123-456-789", "9-5", "Day", "$1000", "manager1password"),
+    ("Jane", "Smith", "female", "456 Manager Ave.", "manager2@example.com", "MGR456", "9876543210", "987-654-321", "8-4", "Day", "$1200", "manager2password"),
+    ("Bob", "Johnson", "male", "789 Manager Rd.", "manager3@example.com", "MGR789", "5555555555", "555-555-555", "10-6", "Night", "$800", "manager3password")
 ]
-
 cursor.executemany("INSERT INTO managers (name, surname, gender, address, email, passport_no, contact, bank_account, working_hours, shift, allowances, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", managers_data)
-
+print("Inserted managers Data")
 # Insert data for operators
 operators_data = [
-    ("Operator 1", "operator1@example.com", "male", "123 Operator St.", "operator1@example.com", "OPR123", "1234567890", "123-456-789", "9-5", "Day", "$100", "Manager 1", "operator1password"),
-    ("Operator 2", "operator2@example.com", "female", "456 Operator Ave.", "operator2@example.com", "OPR456", "9876543210", "987-654-321", "8-4", "Day", "$120", "Manager 2", "operator2password"),
-    ("Operator 3", "operator3@example.com", "male", "789 Operator Rd.", "operator3@example.com", "OPR789", "5555555555", "555-555-555", "10-6", "Night", "$80", "Manager 3", "operator3password")
+    ("Operator 1", "Lola", "male", "123 Operator St.", "operator1@example.com", "OPR123", "1234567890", "123-456-789", "9-5", "Day", "$100", "Manager 1", "operator1password"),
+    ("Operator 2", "Lola1", "female", "456 Operator Ave.", "operator2@example.com", "OPR456", "9876543210", "987-654-321", "8-4", "Day", "$120", "Manager 2", "operator2password"),
+    ("Operator 3", "Lola3", "male", "789 Operator Rd.", "operator3@example.com", "OPR789", "5555555555", "555-555-555", "10-6", "Night", "$80", "Manager 3", "operator3password")
 ]
-
 cursor.executemany("INSERT INTO operators (name, surname, gender, address, email, passport_no, contact, bank_account, working_hours, shift, allowances, manager, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", operators_data)
-
+print("Inserted operators Data")
 # Insert data for customers
 customers_data = [
-    ("Alice", "customer1@example.com", "female", "123 Customer St.", "customer1@example.com", 1234567890, "customer1password"),
-    ("Bob", "customer2@example.com", "male", "456 Customer Ave.", "customer2@example.com", 9876543210, "customer2password"),
-    ("Carol", "customer3@example.com", "female", "789 Customer Rd.", "customer3@example.com", 5555555555, "customer3password"),
-    ("David", "customer4@example.com", "male", "101 Customer Ln.", "customer4@example.com", 1111111111, "customer4password"),
-    ("Eve", "customer5@example.com", "female", "202 Customer Blvd.", "customer5@example.com", 2222222222, "customer5password")
+    ("Alice", "Bond", "female", "123 Customer St.", "customer1@example.com", 1234567890, "customer1password"),
+    ("Bob", "Bond1", "male", "456 Customer Ave.", "customer2@example.com", 9876543210, "customer2password"),
+    ("Carol", "Bond2", "female", "789 Customer Rd.", "customer3@example.com", 5555555555, "customer3password"),
+    ("David", "Bond3", "male", "101 Customer Ln.", "customer4@example.com", 1111111111, "customer4password"),
+    ("Eve", "Bond4", "female", "202 Customer Blvd.", "customer5@example.com", 2222222222, "customer5password")
 ]
-
 cursor.executemany("INSERT INTO customers (name, email, gender, address, email, contact_number, password) VALUES (?, ?, ?, ?, ?, ?, ?)", customers_data)
-
+print("Inserted customers Data")
 '''
-
 
 # ////////////////////// to destroy a window ///////////////////////////////
 
@@ -233,7 +229,7 @@ def loginNow():
     conn = sqlite3.connect('Database.db')
     with conn:
         cursor=conn.cursor()
-    cursor.execute("SELECT * FROM customers WHERE email = ? AND password = ?", (email, password))
+    cursor.execute(f"SELECT * FROM customers WHERE email = '{email}' AND password = '{password}'")
     check_password = cursor.fetchone()
     if check_password[0] == password:
         messagebox.showerror("Success", "The customer logged in.")
@@ -462,20 +458,16 @@ def loginNowOp():
     conn = sqlite3.connect('Database.db')
     with conn:
         cursor=conn.cursor()
-    cursor.execute("SELECT * FROM operators WHERE email = ? AND password = ?", (email, password))
+    cursor.execute(f"SELECT password FROM operators WHERE email = '{email}'")
+    print(email)
     check_password = cursor.fetchone()
+    print(password)
+    print(check_password)
+    print(check_password[0])
     if check_password[0] == password:
         open_operator_window(win)
     else:
         messagebox.showerror("Login Failed!", "Invalid username or password.")
-        
-    '''
-        if cursor.fetchone() is not None:
-            print ("Welcome")
-            operator_landing()
-        else:
-            print ("Login failed")
-    '''
     conn.commit()
 
 
@@ -729,7 +721,7 @@ def OperatorLoginActivity():
     passwordLabel = Label(form_frame, text="Password",width=10,font=("bold", 10))
     passwordLabel.place(x=20,y=65)
 
-    passwordEntry = Entry(form_frame,width = 25, textvar=operator_passportnoVar)
+    passwordEntry = Entry(form_frame,width = 25, textvar=operator_passwordVar)
     passwordEntry.place(x=120,y=65) 
 
     # //////////////// Password icon ////////////////////////////////////
