@@ -9,8 +9,9 @@ from PIL import ImageTk
 from PIL import Image
 
 # Connect to the SQLite database
-conn = sqlite3.connect("Database.db")
-cursor = conn.cursor()
+conn = sqlite3.connect('Database.db')
+with conn:
+    cursor=conn.cursor()
 
 def generate_bike_id():
     cursor.execute("SELECT MAX(BIKE_ID) FROM BIKES")
@@ -72,31 +73,27 @@ def tracking_functionality():
     window.mainloop()
 
 def get_locations():
-    # Connect to the SQLite database
+    '''# Connect to the SQLite database
     conn = sqlite3.connect("Database.db")
-    cursor = conn.cursor()
+    cursor = conn.cursor()'''
 
     # Fetch unique bike locations from the database
     cursor.execute("SELECT DISTINCT BIKE_LOCATION FROM BIKES")
     locations = [row[0] for row in cursor.fetchall()]
 
     # Close the database connection
-    conn.close()
+    # conn.close()
 
     return locations
 
 def get_bikes_at_location(location):
     # Connect to the SQLite database
-    conn = sqlite3.connect("Database.db")
-    cursor = conn.cursor()
+    '''conn = sqlite3.connect("Database.db")
+    cursor = conn.cursor()'''
 
     # Fetch bike details for a specific location
     cursor.execute("SELECT * FROM BIKES WHERE BIKE_LOCATION=?", (location,))
     bikes = cursor.fetchall()
-
-    # Close the database connection
-    conn.close()
-
     return bikes
 
 def open_operator_window(root):
@@ -125,19 +122,24 @@ def open_operator_window(root):
     track_add_remove_frame = Frame(operator_window_frame, bg='#d4d4ff', width=800, height=500)
     track_add_remove_frame.place(x=150, y=100)
 
+    bike_data_frame = Frame(operator_window_frame, width=800, height=500)
+    bike_data_frame.place(x=50, y=200)
     # ////////////////////////////// Bike Registration functionality ///////////////////////////////////////////////
 
     def bike_registration():
         # Labels and Entry fields
-        isavailable_var = IntVar
-        isservicing_var = IntVar
-        ischarged_var = IntVar
+        isavailable_var = BooleanVar()
+        isservicing_var = BooleanVar()
+        ischarged_var = BooleanVar()
 
-        form_frame = Frame(operator_window, bg='#ffe16b',width=950, height=600)
-        form_frame.place(x=470, y=200)
+        bike_reg_frame = Frame(operator_window, bg='#d4d4ff', width=950, height=600)
+        bike_reg_frame.place(x=470, y=200)
+
+        form_frame = Frame(bike_reg_frame, bg='#ffe16b',width=950, height=600)
+        form_frame.place(x=200,y=60)
 
         txt = "BIKE REGISTRATION"
-        heading = Label(operator_window, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
+        heading = Label(bike_reg_frame, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
                                     fg='black',
                                     bd=10,
                                     relief=FLAT)
@@ -147,8 +149,8 @@ def open_operator_window(root):
         bike_id = ttk.Entry(form_frame, state='readonly')
         bike_id.insert(0, generate_bike_id())
 
-        bike_biketype_label = ttk.Label(form_frame, text="Bike Type")
-        bike_biketype_entry = ttk.Entry(form_frame)
+        bike_type_label = ttk.Label(form_frame, text="Bike Type")
+        bike_type_combo = ttk.Combobox(form_frame, values=['electric bike', 'electric car', 'electric motorbike', 'electric scooter'])
 
         bike_name_label = ttk.Label(form_frame, text="Bike Name")
         bike_name_entry = ttk.Entry(form_frame)
@@ -157,7 +159,8 @@ def open_operator_window(root):
         bike_model_entry = ttk.Entry(form_frame)
 
         bike_location_label = ttk.Label(form_frame, text="Bike Location")
-        bike_location_entry = ttk.Entry(form_frame)
+        bike_location_combo = ttk.Combobox(form_frame, values=['Glasgow University', 'City Centre', 'Scotstounhill', 'Partick', 'Rutherglen'])
+
 
         bike_isavailable_check = ttk.Checkbutton(form_frame, text="Available",variable=isavailable_var)
         bike_isservicing_check = ttk.Checkbutton(form_frame, text="In Service", variable=isservicing_var)
@@ -165,35 +168,35 @@ def open_operator_window(root):
 
         bike_id_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         bike_id.grid(row=0, column=1, padx=5, pady=5, sticky='w')
-        bike_biketype_label.grid(row=1, column=0, padx=5, pady=5, sticky='w')
-        bike_biketype_entry.grid(row=1, column=1, padx=5, pady=5, sticky='w')
+        bike_type_label.grid(row=1, column=0, padx=5, pady=5, sticky='w')
+        bike_type_combo.grid(row=1, column=1, padx=5, pady=5, sticky='w')
         bike_name_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
         bike_name_entry.grid(row=2, column=1, padx=5, pady=5, sticky='w')
         bike_model_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
         bike_model_entry.grid(row=3, column=1, padx=5, pady=5, sticky='w')
         bike_location_label.grid(row=4, column=0, padx=5, pady=5, sticky='w')
-        bike_location_entry.grid(row=4, column=1, padx=5, pady=5, sticky='w')
+        bike_location_combo.grid(row=4, column=1, padx=5, pady=5, sticky='w')
         bike_isavailable_check.grid(row=5, column=0, padx=5, pady=5, sticky='w')
         bike_isservicing_check.grid(row=6, column=0, padx=5, pady=5, sticky='w')
         bike_ischarged_check.grid(row=7, column=0, padx=5, pady=5, sticky='w')
 
         # Function to insert data into the database
         def insert_data():
+            bike_id = generate_bike_id()
             cursor.execute('''
-                INSERT INTO bikes (BIKE_ID, BIKE_TYPE, BIKE_NAME, BIKE_MODEL, BIKE_LOCATION, is_available, is_servicing, is_charged)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (bike_biketype_entry.get(), bike_name_entry.get(), bike_model_entry.get(), bike_location_entry.get(), isavailable_var.get(), isservicing_var.get(), ischarged_var.get()))
+                INSERT INTO BIKES (BIKE_ID, BIKE_TYPE, BIKE_NAME, BIKE_MODEL, BIKE_LOCATION, is_available, is_servicing, is_charged)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (bike_id, bike_type_combo.get(), bike_name_entry.get(), bike_model_entry.get(), bike_location_combo.get(), isavailable_var.get(), isservicing_var.get(), ischarged_var.get()))
             conn.commit()
             reset_form()
             bike_id.delete(0, 'end')
-            bike_id.insert(0, generate_bike_id())
 
         # Function to reset the form
         def reset_form():
-            bike_biketype_entry.delete(0, 'end')
+            bike_type_combo.delete(0, 'end')
             bike_name_entry.delete(0, 'end')
             bike_model_entry.delete(0, 'end')
-            bike_location_entry.delete(0, 'end')
+            bike_location_combo.delete(0, 'end')
             bike_isavailable_check.deselect()
             bike_isservicing_check.deselect()
             bike_ischarged_check.deselect()
@@ -210,16 +213,21 @@ def open_operator_window(root):
 
 
     def bike_removal():
-        removal_form_frame = Frame(operator_window, bg='#ffe16b',width=950, height=600)
-        removal_form_frame.place(x=470, y=200)
+        bike_rem_frame = Frame(operator_window, bg='#d4d4ff', width=950, height=600)
+        bike_rem_frame.place(x=470, y=200)
+
+        removal_form_frame = Frame(bike_rem_frame, bg='#ffe16b',width=950, height=600)
+        removal_form_frame.place(x=200,y=53)
+
         txt = "BIKE REMOVAL"
-        heading = Label(operator_window, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
+        heading = Label(bike_rem_frame, text=txt, font=('yu gothic ui', 25, "bold"), bg="#d4d4ff",
                                     fg='black',
                                     bd=10,
                                     relief=FLAT)
         heading.place(x=300, y=30, width=300, height=30)
+        
 
-        bikeid_label = ttk.Label(removal_form_frame, text="Bike Type")
+        bikeid_label = ttk.Label(removal_form_frame, text="Bike ID")
         bikeid_entry = ttk.Entry(removal_form_frame)
         bikeid_label.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         bikeid_entry.grid(row=0, column=1, padx=5, pady=5, sticky='w')
@@ -227,16 +235,16 @@ def open_operator_window(root):
         def remove_bike():
             bike_id = bikeid_entry.get()
             if bike_id:
-                    try:
-                        # Execute the SQL query to delete the bike with the specified ID
-                        cursor.execute("DELETE FROM bikes WHERE bike_id=?", (bike_id,))
-                        conn.commit()
-                        bikeid_entry.delete(0, 'end')
-                        # Optionally, show a confirmation message
-                        messagebox.showinfo("Bike Removed", f"Bike with ID {bike_id} has been removed.")
-                    except sqlite3.Error as e:
-                        # Handle any potential database errors
-                        messagebox.showerror("Error", "An error occurred while removing the bike.")
+                try:
+                    # Execute the SQL query to delete the bike with the specified ID
+                    cursor.execute("DELETE FROM bikes WHERE bike_id=?", (bike_id,))
+                    conn.commit()
+                    bikeid_entry.delete(0, 'end')
+                    # Optionally, show a confirmation message
+                    messagebox.showinfo("Bike Removed", f"Bike with ID {bike_id} has been removed.")
+                except sqlite3.Error as e:
+                    # Handle any potential database errors
+                    messagebox.showerror("Error", "An error occurred while removing the bike.")
             else:
                 messagebox.showerror("Error", "Please enter a valid Bike ID.")
 
@@ -248,9 +256,7 @@ def open_operator_window(root):
     track_bikes_button = tk.Button(track_add_remove_frame, text="Track Bikes", command=tracking_functionality)
     track_bikes_button.grid(column=2,row=0)
 
-    # Fetch bike information from the database
-    cursor.execute("SELECT * FROM bikes")
-    bike_data = cursor.fetchall()
+    
 
 
 # ---------------------------------------------------------------------------------------------------------------------------
@@ -292,12 +298,21 @@ def open_operator_window(root):
         # Show a message confirming the bike is charged and available
         messagebox.showinfo("Bike Charged", f"Bike {bike_id} is now charged and available.")
         # messagebox.showinfo("Repair Bike", f"Repair the bike with ID: {bike_id}")
+    # Fetch bike information from the database
+    cursor.execute("SELECT * FROM BIKES")
+    bike_data = cursor.fetchall()
+    print("bikes data fetched")
+    print()
+    print("Out of For Loop")
+    print(bike_data)
 
     # Create and display rows for each bike
     for bike in bike_data:
-        bike_id, name, bike_type, model = bike
+        print("Inside For")
+        bike_id,bike_type, name, model, location, isavail, isservice, ischarged = bike
+        print(f"bike_id: {bike_id}, name: {name}, bike_type: {bike_type}, model: {model}, location: {location}")
 
-        row_frame = tk.Frame(root)
+        row_frame = tk.Frame(bike_data_frame)
         row_frame.pack()
 
         name_label = tk.Label(row_frame, text=f"Name: {name}")
