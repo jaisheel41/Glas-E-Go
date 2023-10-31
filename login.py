@@ -57,13 +57,13 @@ with conn:
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS payment (
-        payment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        payment_id INTEGER PRIMARY KEY,
         amount REAL,
-        payment_status BOOLEAN
+        payment_status INTEGER
     )''')
 
 cursor.execute('''CREATE TABLE IF NOT EXISTS customers
-             (customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+             (customer_id INTEGER PRIMARY KEY,
               name TEXT,
               surname TEXT,
               email TEXT,
@@ -73,7 +73,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS customers
               contact_number TEXT)''')
 
 cursor.execute('''CREATE TABLE IF NOT EXISTS operators
-             (operator_id INTEGER PRIMARY KEY AUTOINCREMENT,
+             (operator_id INTEGER PRIMARY KEY,
               name TEXT,
               surname TEXT,
               gender TEXT,
@@ -89,7 +89,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS operators
               password TEXT)''')
 
 cursor.execute('''CREATE TABLE IF NOT EXISTS managers
-             (manager_id INTEGER PRIMARY KEY AUTOINCREMENT,
+             (manager_id INTEGER PRIMARY KEY,
               name TEXT,
               surname TEXT,
               gender TEXT,
@@ -104,31 +104,31 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS managers
               password TEXT)''')
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS BIKES (
-        BIKE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        BIKE_ID INTEGER PRIMARY KEY,
         BIKE_TYPE TEXT,
         BIKE_NAME TEXT,
         BIKE_MODEL TEXT,
         BIKE_LOCATION TEXT,
-        is_available BOOLEAN,
-        is_servicing BOOLEAN,
-        is_charged BOOLEAN
+        is_available INTEGER,
+        is_servicing INTEGER,
+        is_charged INTEGER
     )
 ''')
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_util (
-        id INTEGER,
+        id INTEGER PRIMARY KEY,
         bike_id INTEGER,
         alloted_time DATETIME,
         return_time DATETIME,
         payment_id INTEGER,
-        is_offer BOOLEAN,
-        payment_status BOOLEAN,
+        is_offer INTEGER,
+        payment_status INTEGER,
         FOREIGN KEY (id) REFERENCES customers(id),
         FOREIGN KEY (bike_id) REFERENCES bikes(bike_id),
         FOREIGN KEY (payment_id) REFERENCES payment(payment_id)
     )''')
-
+print ("Created all databases")
 '''
 # Insert data for managers
 managers_data = [

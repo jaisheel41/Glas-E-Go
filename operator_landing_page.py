@@ -182,11 +182,11 @@ def open_operator_window(root):
 
         # Function to insert data into the database
         def insert_data():
-            bike_id = generate_bike_id()
+            #bike_id = generate_bike_id()
             cursor.execute('''
-                INSERT INTO BIKES (BIKE_ID, BIKE_TYPE, BIKE_NAME, BIKE_MODEL, BIKE_LOCATION, is_available, is_servicing, is_charged)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (bike_id, bike_type_combo.get(), bike_name_entry.get(), bike_model_entry.get(), bike_location_combo.get(), isavailable_var.get(), isservicing_var.get(), ischarged_var.get()))
+                INSERT INTO BIKES ( BIKE_TYPE, BIKE_NAME, BIKE_MODEL, BIKE_LOCATION, is_available, is_servicing, is_charged)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ( bike_type_combo.get(), bike_name_entry.get(), bike_model_entry.get(), bike_location_combo.get(), isavailable_var.get(), isservicing_var.get(), ischarged_var.get()))
             conn.commit()
             reset_form()
             bike_id.delete(0, 'end')
@@ -197,9 +197,9 @@ def open_operator_window(root):
             bike_name_entry.delete(0, 'end')
             bike_model_entry.delete(0, 'end')
             bike_location_combo.delete(0, 'end')
-            bike_isavailable_check.deselect()
+            '''bike_isavailable_check.deselect()
             bike_isservicing_check.deselect()
-            bike_ischarged_check.deselect()
+            bike_ischarged_check.deselect()'''
 
         submit_button = ttk.Button(form_frame, text="Submit", command=insert_data)
         submit_button.grid(row=8, column=0, columnspan=2, padx=5, pady=10)
