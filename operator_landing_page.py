@@ -22,10 +22,11 @@ def generate_bike_id():
 # ---------------------------------------------------------------------------------------------------------------------------
 # ---------------------------------------####### Tracking Functionality ########---------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------------------
-def tracking_functionality():
+def tracking_functionality(operator_window):
     # Initialize the main window
-    window = tk.Tk()
+    window = tk.Toplevel(operator_window)
     window.title("Bike Tracking")
+    window.geometry('1166x718')
 
     # Create a dropdown menu to select bike locations
     location_label = tk.Label(window, text="Select Location:")
@@ -69,27 +70,21 @@ def tracking_functionality():
     bike_display_frame = tk.Frame(window)
     bike_display_frame.pack()
 
-    # Initialize the main window
-    window.mainloop()
 
 def get_locations():
-    '''# Connect to the SQLite database
+    # Connect to the SQLite database
     conn = sqlite3.connect("Database.db")
-    cursor = conn.cursor()'''
+    cursor = conn.cursor()
 
     # Fetch unique bike locations from the database
     cursor.execute("SELECT DISTINCT BIKE_LOCATION FROM BIKES")
     locations = [row[0] for row in cursor.fetchall()]
-
-    # Close the database connection
-    # conn.close()
-
     return locations
 
 def get_bikes_at_location(location):
     # Connect to the SQLite database
-    '''conn = sqlite3.connect("Database.db")
-    cursor = conn.cursor()'''
+    conn = sqlite3.connect("Database.db")
+    cursor = conn.cursor()
 
     # Fetch bike details for a specific location
     cursor.execute("SELECT * FROM BIKES WHERE BIKE_LOCATION=?", (location,))
@@ -253,7 +248,7 @@ def open_operator_window(root):
 
     remove_bikes_button = tk.Button(track_add_remove_frame, text="Remove Bikes", command=bike_removal)
     remove_bikes_button.grid(column=1,row=0)
-    track_bikes_button = tk.Button(track_add_remove_frame, text="Track Bikes", command=tracking_functionality)
+    track_bikes_button = tk.Button(track_add_remove_frame, text="Track Bikes", command=tracking_functionality(operator_window))
     track_bikes_button.grid(column=2,row=0)
 
     
@@ -306,6 +301,18 @@ def open_operator_window(root):
     print("Out of For Loop")
     print(bike_data)
 
+    titles_frame = Frame(bike_data_frame)
+    titles_frame.pack()
+
+    name_title_label = tk.Label(titles_frame, text="Name")
+    name_title_label.pack(side=tk.LEFT)
+
+    type_title_label = tk.Label(titles_frame, text="Type")
+    type_title_label.pack(side=tk.LEFT)
+
+    model_title_label = tk.Label(titles_frame, text="Model", )
+    model_title_label.pack(side=tk.LEFT)
+
     # Create and display rows for each bike
     for bike in bike_data:
         print("Inside For")
@@ -315,13 +322,13 @@ def open_operator_window(root):
         row_frame = tk.Frame(bike_data_frame)
         row_frame.pack()
 
-        name_label = tk.Label(row_frame, text=f"Name: {name}")
+        name_label = tk.Label(row_frame, text=f"{name}")
         name_label.pack(side=tk.LEFT)
 
-        type_label = tk.Label(row_frame, text=f"Type: {bike_type}")
+        type_label = tk.Label(row_frame, text=f"{bike_type}")
         type_label.pack(side=tk.LEFT)
 
-        model_label = tk.Label(row_frame, text=f"Model: {model}")
+        model_label = tk.Label(row_frame, text=f"{model}")
         model_label.pack(side=tk.LEFT)
 
         charge_button = tk.Button(row_frame, text="Charge", command=lambda bike_id=bike_id: charge_action(bike_id))
