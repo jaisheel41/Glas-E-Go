@@ -17,6 +17,7 @@ cursor.execute(insert_query2)
 cursor.execute(insert_query3)
 cursor.execute(insert_query4)
 cursor.execute(insert_query5)
+print('done')
 
 # Commit the changes and close the connection
 conn.commit()
