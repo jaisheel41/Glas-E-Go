@@ -74,6 +74,7 @@ manager_passwordVar=StringVar()
 
 passStrength = StringVar()
 mail_status = StringVar()
+not_valid = False
 
 # --------------- VALIDATION FUNCTIONS ---------------
 def fnameValidate(input):
@@ -194,6 +195,8 @@ def UserPortal(frame, input_list):
     b3.place(x=510,y=140, width=150,height=50)
     b4 = Button(lgn_frame, text="Change Password", command=lambda: change_password(email))
     b4.place(x=690,y=140, width=120,height=50)
+    b5 = Button(lgn_frame, text="Log out", command=lambda: LoginActivity())
+    b5.place(x=835,y=140, width=120,height=50)
 
     selection = StringVar()
     selection.set("Select a rental station")
@@ -363,7 +366,7 @@ def return_activity(frame, email, bike_name, station_select):
         )""")
     conn.commit()
     total_seconds = (return_time - rent_time).total_seconds()
-    total_amount = 0.5 + ((total_seconds/10) * 0.25)
+    total_amount = 0.5 + ((total_seconds/10) * 0.01)
     isavailable = 1
     rental_station = station_select.get()
     cursor.execute("update BIKES set is_available = '{0}', BIKE_LOCATION = '{1}' where BIKE_NAME = '{2}'" .format(isavailable, rental_station, bike_name))
@@ -566,6 +569,8 @@ def report(frame, email):
 
     b1 = Button(lgn_frame, text="Home", command=lambda: UserPortal(report_frame, y[0]))
     b1.place(x=130,y=55,width=100,height=50)
+    b5 = Button(lgn_frame, text="Log out", command=lambda: LoginActivity())
+    b5.place(x=800,y=55, width=100,height=50)
 
     lb0 = Label(lgn_frame, text="Please select the bike you would like to report as defective", font=("", 16))
     lb0.place(x=100,y=150, width=700,height=40)
@@ -602,6 +607,8 @@ def user_profile(frame, email):
     b0.place(x=380,y=140, width=150,height=50)
     b2 = Button(lgn_frame, text="Report", command = lambda: report(profile_frame, email))
     b2.place(x=560,y=140, width=150,height=50)
+    b5 = Button(lgn_frame, text="Log out", command=lambda: LoginActivity())
+    b5.place(x=750,y=140, width=120,height=50)
 
 
     rental_info = StringVar()
@@ -1300,7 +1307,7 @@ print("Table created")
 
 
 
-def addNewCustomer():
+def addNewCustomer(window):
     name=customer_nameVar.get()
     surname=customer_surnameVar.get()
     email=customer_emailVar.get()
@@ -1308,28 +1315,40 @@ def addNewCustomer():
     gender=customer_genderVar.get()
     contact_number=customer_contact_number.get()
 
-    print("Called add customer method")
-    
-    count=cursor.execute("INSERT INTO customers (name, surname, email, password, gender, contact_number) VALUES (?, ?, ?, ?, ?, ?)",
-              (name, surname, email, password, gender, contact_number))
-    conn.commit()
+    emailValidationFlag = True
+    r = '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,7}'
+    if(re.fullmatch(r, email)):
+        emailValidationFlag = False
 
-    print('hey')
-
-    initial_balance = 0
-    cursor.execute("insert into userWallet (email, available_balance) values(?,?)", (email, initial_balance))
-    conn.commit()
-    print('vsdfgs')
-
-    print("Data inserted")
-    if(cursor.rowcount>0):
-        print ("Signup Done")
-        #LoginActivity()
-        messagebox.showinfo("Success!!!","You have registered successfully. Now Login")
-        #registerScreen.destroy()
+    if(name == "" or surname == "" or email == "" or password == "" or gender == "" or contact_number == ""):
+        messagebox.showerror("Registration Error", "Please make sure to fill all the fields")
+    elif emailValidationFlag == True:
+        messagebox.showerror("Email Error", "Invalid Email")
     else:
-        print ("Signup Error")
+        print("Called add customer method")
+        
+        count=cursor.execute("INSERT INTO customers (name, surname, email, password, gender, contact_number) VALUES (?, ?, ?, ?, ?, ?)",
+                (name, surname, email, password, gender, contact_number))
+        conn.commit()
+
+        print('hey')
+
+        initial_balance = 0
+        cursor.execute("insert into userWallet (email, available_balance) values(?,?)", (email, initial_balance))
+        conn.commit()
+        print('vsdfgs')
+
+        print("Data inserted")
+        if(cursor.rowcount>0):
+            print ("Signup Done")
+            #LoginActivity()
+            messagebox.showinfo("Success!!!","You have registered successfully. Now Login")
+            #registerScreen.destroy()
+        else:
+            print ("Signup Error")
     
+        window.destroy()
+
     
 
 # ========================================================================
@@ -1412,14 +1431,17 @@ def registerWindow():
 
     registerScreen=Toplevel(win)
     registerScreen.title("Registration Here")
- 
+    
+    passStrength.set("")
+    mail_status.set("")
+
     bg_frame = Image.open('images/background1.png')
     photo = ImageTk.PhotoImage(bg_frame)
     bg_panel = Label(registerScreen, image=photo)
     bg_panel.image = photo
     bg_panel.pack(fill='both', expand='yes')
  
-    reg_frame = Frame(registerScreen, bg='#d4d4ff', width=950, height=600)
+    reg_frame = Frame(registerScreen, bg='#d4d4ff', width=1050, height=600)
     reg_frame.place(x=200, y=70)
  
     side_image = Image.open('images/register_side_screen.png')
@@ -1463,7 +1485,12 @@ def registerWindow():
     emailLabel.place(x=525,y=300)
  
     emailEntry = Entry(reg_frame,textvar=customer_emailVar)
+    emailV = win.register(checkEmail)
+    emailEntry.configure(validate="focusout", validatecommand=(emailV, "%P"))
     emailEntry.place(x=710,y=300,width=150)
+
+    EmailLabelValidate = Label(reg_frame, textvariable = mail_status, width=20, font=("bold", 10), bg='#d4d4ff')
+    EmailLabelValidate.place(x=855,y=300)
  
     NumberLabel = Label(reg_frame, text="Mobile Number",width=20,font=("bold", 10))
     NumberLabel.place(x=525,y=330)
@@ -1487,7 +1514,7 @@ def registerWindow():
     passwordLabel = Label(reg_frame, textvariable = passStrength, width=20, font=("bold", 10), bg='#d4d4ff')
     passwordLabel.place(x=710,y=385)
  
-    Button(reg_frame, text='Submit',width=20,bg='blue',fg='white',pady=5,command=addNewCustomer).place(x=620,y=420)
+    Button(reg_frame, text='Submit',width=20,bg='blue',fg='white',pady=5,command= lambda: addNewCustomer(registerScreen)).place(x=620,y=420)
 
 # ========================================================================
 # ============ Login Window by default (for now) ========================================
@@ -1602,7 +1629,7 @@ def LoginActivity():
 
     Button(form_frame,text="Have no Accout! Create one",bg="red",fg="white",font=("bold",10), command=registerWindow).place(x=60,y=170)
 
-    win.mainloop()
+    # win.mainloop()
 
 
 
@@ -1610,7 +1637,7 @@ def LoginActivity():
 # ================================== Operator add =============================
 # =====================================================================================
 
-def addOperator():
+def addOperator(window):
     name=operator_nameVar.get()
     surname=operator_surnameVar.get()
     gender=operator_gendervar.get()
@@ -1625,18 +1652,31 @@ def addOperator():
     manager=operator_managerVar.get()
     password=operator_passwordVar.get()
 
-    count=cursor.execute("INSERT INTO operators (name, surname, gender, address, email, passport_no, contact, bank_account, working_hours, shift, allowances, manager, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-              (name, surname, gender, address, email, passport_no, contact, bank_account, working_hours, shift, allowances, manager, password))
-    print("Data inserted")
-    if(cursor.rowcount>0):
-        print ("Signup Done")
-        #LoginActivity()
-        messagebox.showinfo("Success!!!","You have registered successfully. Now Login")
-        #registerScreen.destroy()
+    emailValidationFlag = False
+    r = '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,7}'
+    if(re.fullmatch(r, email)):
+        emailValidationFlag = True
+
+    if(name == "" or surname == "" or email == "" or password == "" or contact == ""):
+        messagebox.showerror("Registration Error", "Please make sure to fill all the fields")
+    elif emailValidationFlag == False:
+        messagebox.showerror("Email Error", "Invalid Email")
     else:
-        print ("Signup Error")
-    
-    conn.commit()
+
+        count=cursor.execute("INSERT INTO operators (name, surname, gender, address, email, passport_no, contact, bank_account, working_hours, shift, allowances, manager, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (name, surname, gender, address, email, passport_no, contact, bank_account, working_hours, shift, allowances, manager, password))
+        print("Data inserted")
+        if(cursor.rowcount>0):
+            print ("Signup Done")
+            #LoginActivity()
+            messagebox.showinfo("Success!!!","You have registered successfully. Now Login")
+            #registerScreen.destroy()
+        else:
+            print ("Signup Error")
+        
+        conn.commit()
+
+        window.destroy()
 
 
 # =====================================================================================
@@ -1702,13 +1742,16 @@ def OperatorRegisterActivity():
     bg_panel = Label(OpregisterScreen, image=photo)
     bg_panel.image = photo
     bg_panel.pack(fill='both', expand='yes')
+
+    passStrength.set("")
+    mail_status.set("")
    
     #OperatorLoginActivity.lgn_frame_op.destroy()
    
     label = Label(OpregisterScreen, text="Registration Here",width=20,fg="blue",font=("bold", 20))
     label.place(x=490,y=53)
  
-    operator_reg_frame = Frame(OpregisterScreen, bg='#d4d4ff', width=950, height=600)
+    operator_reg_frame = Frame(OpregisterScreen, bg='#d4d4ff', width=1100, height=600)
     operator_reg_frame.place(x=200, y=90)
  
     side_image = Image.open('images/operator.png')
@@ -1718,7 +1761,7 @@ def OperatorRegisterActivity():
     side_image_label.image = photo
     side_image_label.place(x=200, y=150)
  
-    operator_reg_form_frame = Frame(operator_reg_frame, bg='#964b85', width=460, height=400)
+    operator_reg_form_frame = Frame(operator_reg_frame, bg='#964b85', width=500, height=400)
     operator_reg_form_frame.place(x=480, y=110)
  
     '''reg_frame = tk.Frame(window)
@@ -1729,9 +1772,9 @@ def OperatorRegisterActivity():
     nameLabel = Label(operator_reg_frame, text="First Name",width=20,font=("bold", 10))
     nameLabel.place(x=525,y=180)
    
-    validate_text_func = win.register(validate_text)
+    fname = win.register(fnameValidate)
  
-    nameEntery = Entry(operator_reg_frame,textvar=operator_nameVar, validate="key", validatecommand=(validate_text_func, "%P"))
+    nameEntery = Entry(operator_reg_frame,textvar=operator_nameVar, validate="key", validatecommand=(fname, "%P"))
     #nameEntery.pack()
     nameEntery.place(x=710,y=180,width=150)
  
@@ -1742,6 +1785,7 @@ def OperatorRegisterActivity():
     surnameLabel.place(x=525,y=210)
  
     surnameEntery = Entry(operator_reg_frame,textvar=operator_surnameVar)
+    surnameEntery.configure(validate="key", validatecommand=(fname, "%P"))
     surnameEntery.place(x=710,y=210,width=150)
  
     genderLabel = Label(operator_reg_frame, text="Gender",width=20,font=("bold", 10))
@@ -1754,8 +1798,13 @@ def OperatorRegisterActivity():
     emailLabel = Label(operator_reg_frame, text="Email",width=20,font=("bold", 10))
     emailLabel.place(x=525,y=270)
  
+    emailV = win.register(checkEmail)
     emailEntry = Entry(operator_reg_frame,textvar=operator_emailVar)
+    emailEntry.configure(validate="focusout", validatecommand=(emailV, "%P"))
     emailEntry.place(x=710,y=270,width=150)
+
+    emailVLabel = Label(operator_reg_frame, textvariable=mail_status,width=14,font=("bold", 10), bg='#964b85')
+    emailVLabel.place(x=850,y=270)
  
     passport_label = Label(operator_reg_frame, text="Passport No", width=20, font=("bold", 10))
     passport_label.place(x=525,y=300)
@@ -1766,9 +1815,9 @@ def OperatorRegisterActivity():
     NumberLabel = Label(operator_reg_frame, text="Contact No",width=20,font=("bold", 10))
     NumberLabel.place(x=525,y=330)
  
-    validate_numbers_func = win.register(validate_numbers)
+    phoneV = win.register(phoneValidate)
  
-    contactEntry = Entry(operator_reg_frame,textvar=operator_contactVar,validate="key", validatecommand=(validate_numbers_func, "%P"))
+    contactEntry = Entry(operator_reg_frame,textvar=operator_contactVar,validate="key", validatecommand=(phoneV, "%P"))
     #NumberEntry.pack()
  
     #NumberEntry = Entry(reg_frame,textvar=customer_contact_number)
@@ -1788,11 +1837,15 @@ def OperatorRegisterActivity():
  
     passLabel = Label(operator_reg_frame, text="Password",width=20,font=("bold", 10))
     passLabel.place(x=525,y=420)
- 
-    passEntry = Entry(operator_reg_frame,textvar=operator_passwordVar)
+    
+    passV = win.register(checkPassword)
+    passEntry = Entry(operator_reg_frame,textvar=operator_passwordVar, validate="focusout", validatecommand=(passV, "%P"))
     passEntry.place(x=710,y=420,width=150)
+
+    passVLabel = Label(operator_reg_frame, textvariable=passStrength,width=14,font=("bold", 10), bg='#964b85')
+    passVLabel.place(x=850,y=420)
  
-    Button(operator_reg_frame, text='Submit',width=20,bg='blue',fg='white',pady=5,command=addOperator).place(x=620,y=460)
+    Button(operator_reg_frame, text='Submit',width=20,bg='blue',fg='white',pady=5,command = lambda: addOperator(OpregisterScreen)).place(x=620,y=460)
 
     # OpregisterScreen=Toplevel(win)
     # OpregisterScreen.title("Registration Operator Here")
@@ -1876,7 +1929,7 @@ def OperatorRegisterActivity():
     #destroywindow(registerScreen)
 
 
-def addManager():
+def addManager(window):
     name=manager_nameVar.get()
     surname=manager_surnameVar.get()
     gender=manager_gendervar.get()
@@ -1889,18 +1942,30 @@ def addManager():
     allowances=manager_allowancesVar.get()
     password=manager_passwordVar.get()
 
-    count=cursor.execute("INSERT INTO managers (name, surname, gender, email, passport_no, contact, bank_account, working_hours, allowances, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-              (name, surname, gender, email, passport_no, contact, bank_account, working_hours, allowances, password))
-    print("Data inserted")
-    if(cursor.rowcount>0):
-        print ("Signup Done")
-        #LoginActivity()
-        messagebox.showinfo("Success!!!","You have registered successfully. Now Login")
-        #registerScreen.destroy()
+    emailValidationFlag = False
+    r = '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,7}'
+    if(re.fullmatch(r, email)):
+        emailValidationFlag = True
+
+    if(name == "" or surname == "" or email == "" or password == "" or contact == ""):
+        messagebox.showerror("Registration Error", "Please make sure to fill all the fields")
+    elif emailValidationFlag == False:
+        messagebox.showerror("Email Error", "Invalid Email")
     else:
-        print ("Signup Error")
-    
-    conn.commit()
+
+        count=cursor.execute("INSERT INTO managers (name, surname, gender, email, passport_no, contact, bank_account, working_hours, allowances, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (name, surname, gender, email, passport_no, contact, bank_account, working_hours, allowances, password))
+        print("Data inserted")
+        if(cursor.rowcount>0):
+            print ("Signup Done")
+            #LoginActivity()
+            messagebox.showinfo("Success!!!","You have registered successfully. Now Login")
+            #registerScreen.destroy()
+        else:
+            print ("Signup Error")
+        
+        conn.commit()
+        window.destroy()
 
 
 def validate_text(text):
@@ -1996,13 +2061,16 @@ def ManagerRegisterActivity():
     bg_panel = Label(mnregisterScreen, image=photo)
     bg_panel.image = photo
     bg_panel.pack(fill='both', expand='yes')
+
+    passStrength.set("")
+    mail_status.set("")
    
     #OperatorLoginActivity.lgn_frame_op.destroy()
  
     label = Label(mnregisterScreen, text="Registration Here",width=20,fg="blue",font=("bold", 20))
     label.place(x=490,y=53)
  
-    reg_frame_mn = Frame(mnregisterScreen, bg='#d4d4ff', width=1050, height=600)
+    reg_frame_mn = Frame(mnregisterScreen, bg='#d4d4ff', width=1200, height=600)
     reg_frame_mn.place(x=100, y=90)
  
     side_image = Image.open('images/manager.png')
@@ -2012,7 +2080,7 @@ def ManagerRegisterActivity():
     side_image_label.image = photo
     side_image_label.place(x=110, y=160)
  
-    manager_reg_form_frame = Frame(reg_frame_mn, bg='#964b85', width=410, height=410)
+    manager_reg_form_frame = Frame(reg_frame_mn, bg='#964b85', width=490, height=410)
     manager_reg_form_frame.place(x=560, y=90)
  
     # Labels and Entry widgets using grid
@@ -2020,9 +2088,9 @@ def ManagerRegisterActivity():
     nameLabel = Label(reg_frame_mn, text="First Name",width=20,font=("bold", 10))
     nameLabel.place(x=575,y=180)
    
-    validate_text_func = win.register(validate_text)
+    fname = win.register(fnameValidate)
  
-    nameEntery = Entry(reg_frame_mn,textvar=manager_nameVar, validate="key", validatecommand=(validate_text_func, "%P"))
+    nameEntery = Entry(reg_frame_mn,textvar=manager_nameVar, validate="key", validatecommand=(fname, "%P"))
     #nameEntery.pack()
     nameEntery.place(x=750,y=180,width=150)
  
@@ -2031,8 +2099,10 @@ def ManagerRegisterActivity():
  
     surnameLabel = Label(reg_frame_mn, text="Last Name",width=20,font=("bold", 10))
     surnameLabel.place(x=575,y=210)
- 
+    
+    lname = win.register(lnameValidate)
     surnameEntery = Entry(reg_frame_mn,textvar=manager_surnameVar)
+    surnameEntery.configure(validate="key", validatecommand=(lname, "%P"))
     surnameEntery.place(x=750,y=210,width=150)
  
     genderLabel = Label(reg_frame_mn, text="Gender",width=20,font=("bold", 10))
@@ -2046,7 +2116,12 @@ def ManagerRegisterActivity():
     emailLabel.place(x=575,y=270)
  
     emailEntry = Entry(reg_frame_mn,textvar=manager_emailVar)
+    emailV = win.register(checkEmail)
+    emailEntry.configure(validate="focusout", validatecommand=(emailV, "%P"))
     emailEntry.place(x=750,y=270,width=150)
+
+    emailValidateLabel = Label(reg_frame_mn, textvariable = mail_status, width=14, font=("bold", 10), bg='#964b85')
+    emailValidateLabel.place(x=890,y=270)
  
     passport_label = Label(reg_frame_mn, text="Passport No", width=20, font=("bold", 10))
     passport_label.place(x=575,y=300)
@@ -2085,10 +2160,14 @@ def ManagerRegisterActivity():
  
     passLabel = Label(reg_frame_mn, text="Password",width=20,font=("bold", 10))
     passLabel.place(x=575,y=420)
- 
+    
+    passV = win.register(checkPassword)
     passEntry = Entry(reg_frame_mn,textvar=manager_passwordVar)
+    passEntry.configure(validate="focusout", validatecommand=(passV, "%P"))
     passEntry.place(x=750,y=420,width=150)
  
+    passValidateLabel = Label(reg_frame_mn, textvariable = passStrength, width=14, font=("bold", 10), bg='#964b85')
+    passValidateLabel.place(x=890,y=420)
    
    
     # tk.Label(manager_reg_form_frame, text="Id", width=20, font=("bold", 10)).grid(row=0, column=0)
@@ -2138,7 +2217,7 @@ def ManagerRegisterActivity():
     # tk.Label(manager_reg_form_frame, text="Password", width=20, font=("bold", 10)).grid(row=12, column=0)
     # passEntry = tk.Entry(manager_reg_form_frame, textvariable=operator_passwordVar, show='*')
     # passEntry.grid(row=12, column=1)
-    Button(reg_frame_mn, text='Submit',width=20,bg='blue',fg='white',pady=5,command=addManager).place(x=680,y=460)
+    Button(reg_frame_mn, text='Submit',width=20,bg='blue',fg='white',pady=5,command= lambda: addManager(mnregisterScreen)).place(x=680,y=460)
     #tk.Button(manager_reg_form_frame, text='Submit', width=20, bg='blue', fg='white', pady=5, command=addManager).grid(row=13, column=1)
 
 def OperatorLoginActivity():
@@ -2399,3 +2478,4 @@ win.config(menu=menu_bar)
 
 
 LoginActivity()
+win.mainloop()
